@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
-import { suivreSession, estAdmin, deconnecterAdmin, recupererFournisseurs, recupererStats } from '../api/admin.js';
+import { recupererFournisseurs, recupererStats } from '../api/admin.js';
+import { useSessionAdmin } from '../hooks/useSessionAdmin.js';
 import CarteFournisseurAdmin from '../components/CarteFournisseurAdmin.jsx';
+import NavAdmin from '../components/NavAdmin.jsx';
 
 const ONGLETS = [
   { cle: 'en_attente', libelle: 'En attente' },
@@ -11,9 +13,7 @@ const ONGLETS = [
 ];
 
 export default function TableauDeBord() {
-  const navigate = useNavigate();
-  const [session, setSession] = useState(undefined);
-  const [autorise, setAutorise] = useState(undefined);
+  const { session, autorise } = useSessionAdmin();
   const [fournisseurs, setFournisseurs] = useState(undefined);
   const [stats, setStats] = useState(undefined);
   const [onglet, setOnglet] = useState('en_attente');
@@ -24,14 +24,6 @@ export default function TableauDeBord() {
     recupererStats().then(setStats).catch(() => {});
   }, []);
 
-  useEffect(() => suivreSession(setSession), []);
-
-  useEffect(() => {
-    if (session === undefined) return;
-    if (session === null) { navigate('/connexion'); return; }
-    estAdmin().then(setAutorise).catch(() => setAutorise(false));
-  }, [session, navigate]);
-
   useEffect(() => {
     if (autorise) recharger();
   }, [autorise, recharger]);
@@ -40,14 +32,7 @@ export default function TableauDeBord() {
     return <section className="section"><div className="container"><div className="loo-squelette" style={{ height: '200px' }} /></div></section>;
   }
   if (autorise === false) {
-    return (
-      <section className="section"><div className="container">
-        <p>Ce compte n'a pas les droits d'administration.</p>
-        <button type="button" className="btn btn-outline" onClick={() => deconnecterAdmin().then(() => navigate('/connexion'))} style={{ marginTop: '1rem' }}>
-          Se déconnecter
-        </button>
-      </div></section>
-    );
+    return <section className="section"><div className="container"><p>Ce compte n'a pas les droits d'administration.</p></div></section>;
   }
 
   const liste = (fournisseurs || []).filter((f) => f.statut === onglet);
@@ -55,12 +40,8 @@ export default function TableauDeBord() {
   return (
     <section className="section">
       <div className="container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.6rem' }}>
-          <h1 className="section-titre" style={{ margin: 0 }}>Fournisseurs</h1>
-          <button type="button" className="btn btn-outline" onClick={() => deconnecterAdmin().then(() => navigate('/connexion'))}>
-            <LogOut size={16} /> Se déconnecter
-          </button>
-        </div>
+        <NavAdmin />
+        <h1 className="section-titre" style={{ marginTop: 0 }}>Fournisseurs</h1>
 
         {stats && (
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.8rem' }}>

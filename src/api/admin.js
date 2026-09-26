@@ -51,3 +51,10 @@ export async function recupererStats() {
   if (error) throw error;
   return data;
 }
+
+
+export async function recupererStatsBoutiques(token) {
+  const reponse = await fetch('/api/boutiques-stats', { headers: { Authorization: `Bearer ${token}` } });
+  if (!reponse.ok) throw new Error("Impossible de charger les statistiques des boutiques.");
+  return reponse.json();
+}
