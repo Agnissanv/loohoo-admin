@@ -50,6 +50,7 @@ export default function TableauDeBord() {
             <CarteStat titre="Vérifiés" valeur={stats.grossistes_verifies} />
             <CarteStat titre="En attente" valeur={stats.grossistes_en_attente} />
             <CarteStat titre="Produits" valeur={stats.produits_total} />
+            <CarteStat titre="Produits en attente" valeur={stats.produits_en_attente} />
             <CarteStat titre="Contacts (7 j)" valeur={stats.contacts_7_jours} />
           </div>
         )}

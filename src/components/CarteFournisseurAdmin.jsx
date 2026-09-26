@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BadgeCheck, ChevronDown, ChevronUp, MapPin, Package, Phone, MessageCircle } from 'lucide-react';
-import { changerStatut, changerBadgeVerifie } from '../api/admin.js';
+import { changerStatut, changerBadgeVerifie, modererProduit } from '../api/admin.js';
 
 const STATUTS = {
   en_attente: { texte: 'En attente', couleur: 'var(--loo-orange)' },
@@ -98,13 +98,39 @@ export default function CarteFournisseurAdmin({ f, onChange }) {
           </div>
 
           <div>
-            <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Catalogue</p>
+            <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 0.4rem' }}>
+              Catalogue — chaque produit doit être vérifié individuellement
+            </p>
             {f.produit.length > 0 ? (
-              <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.85rem' }}>
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
                 {f.produit.map((p) => (
-                  <li key={p.id}>{p.nom} — {p.prix_gros_fcfa.toLocaleString('fr-FR')} F CFA (min. {p.moq})</li>
+                  <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', fontSize: '0.85rem', borderBottom: '1px solid var(--loo-papier-ombre)', paddingBottom: '0.4rem' }}>
+                    <div>
+                      <strong>{p.nom}</strong> — {p.prix_gros_fcfa.toLocaleString('fr-FR')} F CFA (min. {p.moq})
+                      <span style={{ marginLeft: '0.6rem', fontWeight: 700, color: p.statut === 'publie' ? '#2f8f4e' : p.statut === 'rejete' ? 'var(--loo-rouge)' : 'var(--loo-orange)' }}>
+                        {p.statut === 'publie' ? 'Publié' : p.statut === 'rejete' ? 'Rejeté' : 'En attente'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      {p.statut !== 'publie' && (
+                        <button type="button" className="btn btn-primary" disabled={enCours} style={{ padding: '0.3em 0.8em', fontSize: '0.78rem' }}
+                          onClick={() => agir(() => modererProduit(p.id, 'publie'))}>
+                          Publier
+                        </button>
+                      )}
+                      {p.statut !== 'rejete' && (
+                        <button type="button" className="btn btn-outline" disabled={enCours} style={{ padding: '0.3em 0.8em', fontSize: '0.78rem' }}
+                          onClick={() => {
+                            const motif = window.prompt('Motif du rejet (visible par le fournisseur) :');
+                            if (motif !== null) agir(() => modererProduit(p.id, 'rejete', motif));
+                          }}>
+                          Rejeter
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
               <p style={{ opacity: 0.6, fontSize: '0.85rem', margin: 0 }}>Aucun produit ajouté.</p>
             )}

@@ -29,11 +29,16 @@ export async function recupererFournisseurs() {
       id, nom, categorie, ville, commune, statut, badge_verifie, stock_confirme, est_fabricant, date_ajout,
       grossiste_contact(telephone),
       grossiste_photo(id, url),
-      produit(id, nom, prix_gros_fcfa, moq)
+      produit(id, nom, prix_gros_fcfa, moq, statut, motif_rejet)
     `)
     .order('date_ajout', { ascending: false });
   if (error) throw error;
   return data;
+}
+
+export async function modererProduit(id, statut, motif = null) {
+  const { error } = await supabase.rpc('moderer_produit', { p_id: id, p_statut: statut, p_motif: motif });
+  if (error) throw error;
 }
 
 export async function changerStatut(id, statut) {
