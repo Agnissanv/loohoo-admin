@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BadgeCheck, MapPin, Package, Phone } from 'lucide-react';
+import { BadgeCheck, ChevronDown, ChevronUp, MapPin, Package, Phone, MessageCircle } from 'lucide-react';
 import { changerStatut, changerBadgeVerifie } from '../api/admin.js';
 
 const STATUTS = {
@@ -11,8 +11,12 @@ const STATUTS = {
 export default function CarteFournisseurAdmin({ f, onChange }) {
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState('');
+  const [ouvert, setOuvert] = useState(false);
+
   const statut = STATUTS[f.statut];
-  const aLesPrerequis = f.grossiste_photo.length > 0 && f.grossiste_contact.length > 0 && f.stock_confirme;
+  const telephone = f.grossiste_contact[0]?.telephone || null;
+  const numeroWhatsApp = telephone ? telephone.replace(/[^0-9]/g, '') : null;
+  const aLesPrerequis = f.grossiste_photo.length > 0 && !!telephone && f.stock_confirme;
 
   async function agir(action) {
     setEnCours(true);
@@ -32,7 +36,9 @@ export default function CarteFournisseurAdmin({ f, onChange }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
         <div>
           <strong>{f.nom}</strong>
-          <div style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.2rem' }}>{f.categorie}</div>
+          <div style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.2rem' }}>
+            {f.categorie}{f.est_fabricant && ' · Fabricant local'}
+          </div>
         </div>
         <span style={{ color: statut.couleur, fontWeight: 700, fontSize: '0.82rem', whiteSpace: 'nowrap' }}>{statut.texte}</span>
       </div>
@@ -45,9 +51,66 @@ export default function CarteFournisseurAdmin({ f, onChange }) {
           <Package size={14} /> {f.produit.length} produit{f.produit.length > 1 ? 's' : ''}
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-          <Phone size={14} /> {f.grossiste_contact.length > 0 ? 'Contact renseigné' : 'Contact manquant'}
+          <Phone size={14} /> {telephone ? 'Contact renseigné' : 'Contact manquant'}
         </span>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setOuvert((o) => !o)}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'none', border: 0, padding: 0, cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', color: 'var(--loo-rouge)', justifySelf: 'start' }}
+      >
+        {ouvert ? <ChevronUp size={16} /> : <ChevronDown size={16} />} {ouvert ? 'Masquer le détail' : 'Voir le détail (pour vérifier)'}
+      </button>
+
+      {ouvert && (
+        <div style={{ borderTop: '1px solid var(--loo-papier-ombre)', paddingTop: '0.8rem', display: 'grid', gap: '0.9rem' }}>
+          <div>
+            <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Contact à vérifier</p>
+            {telephone ? (
+              <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: 'var(--police-etiquette)', fontSize: '0.9rem' }}>{telephone}</span>
+                <a href={`tel:${numeroWhatsApp}`} className="btn btn-outline" style={{ padding: '0.3em 0.8em', fontSize: '0.8rem' }}>
+                  <Phone size={14} /> Appeler
+                </a>
+                <a href={`https://wa.me/${numeroWhatsApp}`} target="_blank" rel="noreferrer" className="btn btn-outline" style={{ padding: '0.3em 0.8em', fontSize: '0.8rem' }}>
+                  <MessageCircle size={14} /> WhatsApp
+                </a>
+              </div>
+            ) : (
+              <p style={{ opacity: 0.6, fontSize: '0.85rem', margin: 0 }}>Aucun numéro renseigné.</p>
+            )}
+          </div>
+
+          <div>
+            <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Photos ({f.grossiste_photo.length})</p>
+            {f.grossiste_photo.length > 0 ? (
+              <div className="photos-grossiste" style={{ margin: 0 }}>
+                {f.grossiste_photo.map((p) => (
+                  <a key={p.id} href={p.url} target="_blank" rel="noreferrer">
+                    <img src={p.url} alt="" loading="lazy" />
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p style={{ opacity: 0.6, fontSize: '0.85rem', margin: 0 }}>Aucune photo.</p>
+            )}
+          </div>
+
+          <div>
+            <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Catalogue</p>
+            {f.produit.length > 0 ? (
+              <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.85rem' }}>
+                {f.produit.map((p) => (
+                  <li key={p.id}>{p.nom} — {p.prix_gros_fcfa.toLocaleString('fr-FR')} F CFA (min. {p.moq})</li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ opacity: 0.6, fontSize: '0.85rem', margin: 0 }}>Aucun produit ajouté.</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {!aLesPrerequis && f.statut !== 'publie' && (
         <p style={{ fontSize: '0.8rem', color: 'var(--loo-orange)', margin: 0 }}>

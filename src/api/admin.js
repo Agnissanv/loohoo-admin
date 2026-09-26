@@ -25,7 +25,12 @@ export async function estAdmin() {
 export async function recupererFournisseurs() {
   const { data, error } = await supabase
     .from('grossiste')
-    .select('id, nom, categorie, ville, commune, statut, badge_verifie, stock_confirme, date_ajout, grossiste_contact(telephone), grossiste_photo(id), produit(id)')
+    .select(`
+      id, nom, categorie, ville, commune, statut, badge_verifie, stock_confirme, est_fabricant, date_ajout,
+      grossiste_contact(telephone),
+      grossiste_photo(id, url),
+      produit(id, nom, prix_gros_fcfa, moq)
+    `)
     .order('date_ajout', { ascending: false });
   if (error) throw error;
   return data;
