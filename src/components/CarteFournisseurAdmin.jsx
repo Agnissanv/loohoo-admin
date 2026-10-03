@@ -85,14 +85,14 @@ export default function CarteFournisseurAdmin({ f, onChange }) {
           <div>
             <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Photos ({f.grossiste_photo.length})</p>
             {f.grossiste_photo.length > 0 ? (
-              <div className="photos-grossiste" style={{ margin: 0 }}>
+              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
                 {f.grossiste_photo.map((p) => (
                   <a key={p.id} href={p.url} target="_blank" rel="noreferrer">
-                    <img src={p.url} alt="" loading="lazy" />
+                    <img src={p.url} alt="" loading="lazy" style={{ width: '90px', height: '90px', objectFit: 'cover', borderRadius: 'var(--rayon-sm)' }} />
                   </a>
                 ))}
               </div>
-            ) : (
+            ) : ( 
               <p style={{ opacity: 0.6, fontSize: '0.85rem', margin: 0 }}>Aucune photo.</p>
             )}
           </div>
