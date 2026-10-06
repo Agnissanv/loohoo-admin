@@ -289,3 +289,15 @@ export async function recupererStatsBoutiques(token) {
   if (!reponse.ok) throw new Error('Impossible de charger les statistiques des boutiques.');
   return reponse.json();
 }
+
+// ---- Avis des acheteurs (migration 0016) ----
+export async function recupererAvis() {
+  const { data, error } = await supabase.rpc('admin_liste_avis', { p_statut: null });
+  if (error) throw error;
+  return data;
+}
+
+export async function modererAvis(id, publier, motif = null) {
+  const { error } = await supabase.rpc('admin_moderer_avis', { p_id: id, p_publier: publier, p_motif: motif });
+  if (error) throw error;
+}
