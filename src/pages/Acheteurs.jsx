@@ -88,7 +88,7 @@ function Details({ acheteur, conversations }) {
         <h3 style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>Conversations</h3>
         {conversations.length === 0 && <p className="esp-aide">Aucune conversation.</p>}
         {conversations.map((c) => (
-          <Link key={c.id} to={`/conversations/${c.id}`} className="esp-liste-ligne">
+          <Link key={c.id} to={`/f/conversations/${c.id}`} className="esp-liste-ligne">
             <span style={{ fontSize: '0.9rem' }}>{c.grossiste?.nom}{c.produit?.nom ? ` · ${c.produit.nom}` : ''}</span>
             <span className="esp-aide">{formatRelatif(c.derniere_activite)}</span>
           </Link>

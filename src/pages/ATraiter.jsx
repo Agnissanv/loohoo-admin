@@ -78,7 +78,7 @@ function LigneFournisseur({ f }) {
             {f.drapeau_coordonnees && <span className="esp-puce esp-puce-orange">Coordonnées détectées</span>}
           </div>
         </div>
-        <Link to={`/fournisseurs/${f.id}`} className="btn btn-primary adm-bouton-petit">Examiner la fiche</Link>
+        <Link to={`/f/fournisseurs/${f.id}`} className="btn btn-primary adm-bouton-petit">Examiner la fiche</Link>
       </div>
     </div>
   );
@@ -100,7 +100,7 @@ function LigneProduit({ p, onChange }) {
         <div style={{ flex: '1 1 260px', minWidth: 0 }}>
           <strong>{p.nom}</strong>
           <div style={{ fontSize: '0.84rem', opacity: 0.7 }}>
-            <Link to={`/fournisseurs/${p.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{p.grossiste?.nom}</Link> · {formatPrix(p.prix_gros_fcfa)} · minimum {p.moq}{p.stock_disponible != null ? ` · stock ${p.stock_disponible}` : ''}
+            <Link to={`/f/fournisseurs/${p.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{p.grossiste?.nom}</Link> · {formatPrix(p.prix_gros_fcfa)} · minimum {p.moq}{p.stock_disponible != null ? ` · stock ${p.stock_disponible}` : ''}
           </div>
           {p.description && <p style={{ margin: '0.4rem 0 0', fontSize: '0.88rem', lineHeight: 1.5, opacity: 0.85 }}>{p.description.slice(0, 260)}{p.description.length > 260 ? '…' : ''}</p>}
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
@@ -143,7 +143,7 @@ function LigneDocument({ d, onChange }) {
         <div>
           <strong>{TYPES_DOCUMENT[d.type] || d.type}</strong>
           <div style={{ fontSize: '0.84rem', opacity: 0.7 }}>
-            <Link to={`/fournisseurs/${d.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{d.grossiste?.nom}</Link> · {d.nom_fichier}
+            <Link to={`/f/fournisseurs/${d.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{d.grossiste?.nom}</Link> · {d.nom_fichier}
           </div>
         </div>
         <div className="adm-actions">
@@ -186,7 +186,7 @@ function LigneMessage({ m, onChange }) {
           )}
         </div>
         <div className="adm-actions" style={{ alignSelf: 'center' }}>
-          {conv?.id && <Link to={`/conversations/${conv.id}`} className="btn btn-outline adm-bouton-petit">Voir la conversation</Link>}
+          {conv?.id && <Link to={`/f/conversations/${conv.id}`} className="btn btn-outline adm-bouton-petit">Voir la conversation</Link>}
           <button type="button" className="btn btn-primary adm-bouton-petit" onClick={traiter}><Check size={14} /> Marquer traité</button>
         </div>
       </div>

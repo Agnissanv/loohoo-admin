@@ -111,7 +111,7 @@ export default function Affaires() {
                 return (
                   <tr key={a.id}>
                     <td style={{ whiteSpace: 'nowrap' }}>{formatDate(a.date_declaration)}<div className="esp-aide">par {a.declaree_par === 'fournisseur' ? 'le fournisseur' : "l'acheteur"}</div></td>
-                    <td>{a.grossiste_id ? <Link to={`/fournisseurs/${a.grossiste_id}`} style={{ textDecoration: 'underline' }}>{a.grossiste_nom}</Link> : a.grossiste_nom}</td>
+                    <td>{a.grossiste_id ? <Link to={`/f/fournisseurs/${a.grossiste_id}`} style={{ textDecoration: 'underline' }}>{a.grossiste_nom}</Link> : a.grossiste_nom}</td>
                     <td>{a.vendeur_nom}{a.produit_nom && <div className="esp-aide">{a.produit_nom}</div>}</td>
                     <td><strong>{formatPrix(a.montant_fcfa)}</strong>{a.description && <div className="esp-aide">{a.description}</div>}</td>
                     <td><span className={`esp-puce ${st.classe}`}>{st.texte}</span></td>

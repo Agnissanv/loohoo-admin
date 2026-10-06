@@ -350,3 +350,32 @@ img { max-width: 100%; display: block; }
 .adm-bouton-petit { padding: 0.4em 0.9em !important; font-size: 0.8rem !important; }
 .adm-bouton-danger { background: #B42318 !important; color: #fff !important; }
 .adm-bouton-succes { background: #1f7a3d !important; color: #fff !important; }
+
+
+/* ====== Deux espaces : Fournisseurs (couleurs LOOHOO) et Boutiques (teinte distincte) ====== */
+.esp-espaces { display: inline-flex; gap: 0.3rem; padding: 0.25rem; background: var(--loo-papier); border: 1px solid var(--loo-papier-ombre); border-radius: 999px; }
+.esp-espace { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.45em 1.05em; border-radius: 999px; font-weight: 700; font-size: 0.88rem; color: var(--loo-encre); white-space: nowrap; }
+.esp-espace:hover { background: #fff; }
+.esp-espace-actif { background: var(--loo-rouge); color: #fff; }
+.esp-espace-actif:hover { background: var(--loo-rouge); }
+.esp-espace-boutiques.esp-espace-actif { background: #0F766E; }
+.esp-espace-boutiques.esp-espace-actif:hover { background: #0F766E; }
+.esp-espaces-menu { display: none; }
+@media (max-width: 860px) {
+  .esp-espaces-haut { display: none; }
+  .esp-espaces-menu { display: flex; width: 100%; margin-bottom: 0.8rem; justify-content: center; }
+  .esp-role { display: none; }
+}
+/* Dans l'espace Boutiques, tous les accents (liens actifs, boutons, bandeau, pastilles) passent au vert-bleu */
+.esp-boutiques { --loo-rouge: #0F766E; --loo-orange: #14B8A6; --gradient-marque: linear-gradient(115deg, #14B8A6 0%, #0F766E 100%); }
+.esp-boutiques .esp-lien-actif { background: #E6F6F4; }
+.esp-boutiques .esp-espace-actif { background: #0F766E; }
+.esp-menu .esp-menu-titre { padding: 0.5rem 0.9rem 0.2rem; }
+.adm-carte-espace { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.6rem; background: #fff; border: 2px solid var(--loo-papier-ombre); border-radius: 18px; box-shadow: var(--ombre-carte); transition: transform 0.15s ease, border-color 0.15s ease; }
+.adm-carte-espace:hover { transform: translateY(-3px); }
+.adm-carte-fournisseurs:hover { border-color: #EF4136; }
+.adm-carte-boutiques:hover { border-color: #0F766E; }
+.adm-stats-ligne { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+.adm-stats-ligne > div { min-width: 90px; }
+.adm-stats-ligne strong { display: block; font-family: var(--police-affiche); font-size: 1.6rem; line-height: 1.1; }
+.adm-stats-ligne span { font-size: 0.78rem; opacity: 0.7; }

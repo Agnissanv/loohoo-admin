@@ -1,25 +1,37 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ClipboardCheck, Factory, Handshake, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Package, ScrollText, Settings, Store, Tags, Users, X,
+  ClipboardCheck, Factory, Handshake, Home, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Package, ScrollText, Settings, Store, Tags, Users, X,
 } from 'lucide-react';
 import { deconnecterAdmin, suivreSession, estAdmin, estSuperAdmin, tableauDeBord } from '../api/admin.js';
 import { initiales } from '../utils/format.js';
 
-const LIENS = [
-  { vers: '/', texte: 'Tableau de bord', icone: LayoutDashboard, fin: true },
-  { vers: '/a-traiter', texte: 'À traiter', icone: ClipboardCheck, pastille: true },
-  { vers: '/fournisseurs', texte: 'Fournisseurs', icone: Factory },
-  { vers: '/produits', texte: 'Produits', icone: Package },
-  { vers: '/acheteurs', texte: 'Acheteurs', icone: Users },
-  { vers: '/conversations', texte: 'Conversations', icone: MessageSquare },
-  { vers: '/affaires', texte: 'Affaires et commissions', icone: Handshake },
-  { vers: '/leads', texte: 'Leads', icone: Mail },
-  { vers: '/boutiques', texte: 'Boutiques', icone: Store },
+// Deux espaces distincts, pour que l'administrateur sache toujours où il est :
+//   Fournisseurs (/f) : la plateforme de sourcing B2B       Boutiques (/b) : la plateforme de création de boutiques
+// Les pages communes (accueil, journal d'audit, équipe) sont accessibles depuis les deux.
+const LIENS_FOURNISSEURS = [
+  { vers: '/f', texte: 'Tableau de bord', icone: LayoutDashboard, fin: true },
+  { vers: '/f/a-traiter', texte: 'À traiter', icone: ClipboardCheck, pastille: true },
+  { vers: '/f/fournisseurs', texte: 'Fournisseurs', icone: Factory },
+  { vers: '/f/produits', texte: 'Produits', icone: Package },
+  { vers: '/f/acheteurs', texte: 'Acheteurs', icone: Users },
+  { vers: '/f/conversations', texte: 'Conversations', icone: MessageSquare },
+  { vers: '/f/affaires', texte: 'Affaires et commissions', icone: Handshake },
+  { vers: '/f/leads', texte: 'Leads des acheteurs', icone: Mail },
+  { vers: '/f/categories', texte: 'Catégories', icone: Tags, superSeulement: true },
+];
+const LIENS_BOUTIQUES = [
+  { vers: '/b', texte: 'Tableau de bord', icone: LayoutDashboard, fin: true },
+  { vers: '/b/boutiques', texte: 'Boutiques connectées', icone: Store },
+  { vers: '/b/leads', texte: "Demandes d'ouverture", icone: Mail },
+];
+const LIENS_GENERAUX = [
+  { vers: '/', texte: 'Accueil', icone: Home, fin: true },
   { vers: '/journal', texte: "Journal d'audit", icone: ScrollText },
-  { vers: '/categories', texte: 'Catégories', icone: Tags, superSeulement: true },
   { vers: '/equipe', texte: 'Équipe', icone: Settings, superSeulement: true },
 ];
+
+const espaceDe = (pathname) => (/^\/f(\/|$)/.test(pathname) ? 'fournisseurs' : /^\/b(\/|$)/.test(pathname) ? 'boutiques' : 'general');
 
 // Cadre de l'administration : accès réservé aux comptes de la table admins
 export default function LayoutAdmin() {
@@ -61,26 +73,49 @@ export default function LayoutAdmin() {
     );
   }
 
+  const espace = espaceDe(pathname);
   const aTraiter = compteurs
     ? compteurs.fournisseurs.en_attente + compteurs.produits.en_attente + compteurs.documents_en_attente + compteurs.messages.signales + (compteurs.affaires?.contestees || 0)
     : 0;
+  const liensEspace = espace === 'fournisseurs' ? LIENS_FOURNISSEURS : espace === 'boutiques' ? LIENS_BOUTIQUES : [];
+  const visible = (lien) => !lien.superSeulement || superAdmin;
+
+  const lienMenu = ({ vers, texte, icone: Icone, pastille, fin }) => (
+    <NavLink key={vers} to={vers} end={fin} className={({ isActive }) => `esp-lien${isActive ? ' esp-lien-actif' : ''}`}>
+      <Icone size={19} /> {texte}
+      {pastille && aTraiter > 0 && <span className="esp-pastille">{aTraiter > 99 ? '99+' : aTraiter}</span>}
+    </NavLink>
+  );
+
+  const selecteur = (classe) => (
+    <div className={classe} role="tablist" aria-label="Espace d'administration">
+      <Link to="/f" role="tab" aria-selected={espace === 'fournisseurs'} className={`esp-espace${espace === 'fournisseurs' ? ' esp-espace-actif' : ''}`}>
+        <Factory size={16} /> Fournisseurs {aTraiter > 0 && <span className="esp-pastille" style={{ position: 'static' }}>{aTraiter > 99 ? '99+' : aTraiter}</span>}
+      </Link>
+      <Link to="/b" role="tab" aria-selected={espace === 'boutiques'} className={`esp-espace esp-espace-boutiques${espace === 'boutiques' ? ' esp-espace-actif' : ''}`}>
+        <Store size={16} /> Boutiques
+      </Link>
+    </div>
+  );
 
   return (
-    <div className={`esp${menuOuvert ? ' esp-menu-ouvert' : ''}`}>
+    <div className={`esp esp-${espace}${menuOuvert ? ' esp-menu-ouvert' : ''}`}>
       <header className="esp-haut">
         <div className="esp-marque">
           <button type="button" className="esp-bouton-icone esp-burger" onClick={() => setMenuOuvert((o) => !o)} aria-label="Ouvrir le menu">
             {menuOuvert ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <img src="/logo.jpeg" alt="" width="34" height="34" />
-          <span className="esp-marque-nom">LOOHOO</span>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <img src="/logo.jpeg" alt="" width="34" height="34" />
+            <span className="esp-marque-nom">LOOHOO</span>
+          </Link>
           <span className="esp-marque-sep" />
           <span className="esp-marque-titre">Administration</span>
         </div>
+        {selecteur('esp-espaces esp-espaces-haut')}
         <div className="esp-haut-droite">
-          <span className="esp-puce esp-puce-neutre" title="Votre rôle">{superAdmin ? 'Super-admin' : 'Modérateur'}</span>
+          <span className="esp-puce esp-puce-neutre esp-role" title="Votre rôle">{superAdmin ? 'Super-admin' : 'Modérateur'}</span>
           <span className="esp-avatar" title={session.user.email}>{initiales(session.user.email)}</span>
-          <span className="esp-nom">{session.user.email}</span>
           <button type="button" className="esp-bouton-icone" aria-label="Se déconnecter" title="Se déconnecter" onClick={() => deconnecterAdmin().then(() => navigate('/connexion'))}>
             <LogOut size={20} />
           </button>
@@ -89,12 +124,13 @@ export default function LayoutAdmin() {
 
       <div className="esp-corps">
         <nav className="esp-menu" aria-label="Administration">
-          {LIENS.filter((lien) => !lien.superSeulement || superAdmin).map(({ vers, texte, icone: Icone, pastille, fin }) => (
-            <NavLink key={vers} to={vers} end={fin} className={({ isActive }) => `esp-lien${isActive ? ' esp-lien-actif' : ''}`}>
-              <Icone size={19} /> {texte}
-              {pastille && aTraiter > 0 && <span className="esp-pastille">{aTraiter > 99 ? '99+' : aTraiter}</span>}
-            </NavLink>
-          ))}
+          {selecteur('esp-espaces esp-espaces-menu')}
+          {espace !== 'general' && <div className="esp-menu-titre">{espace === 'fournisseurs' ? 'Espace Fournisseurs' : 'Espace Boutiques'}</div>}
+          {liensEspace.filter(visible).map(lienMenu)}
+          <div className="esp-menu-bas">
+            <div className="esp-menu-titre">Général</div>
+            {LIENS_GENERAUX.filter(visible).map(lienMenu)}
+          </div>
         </nav>
         <div className="esp-voile" onClick={() => setMenuOuvert(false)} />
         <main className="esp-contenu">

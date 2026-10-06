@@ -69,6 +69,13 @@ export async function recupererFournisseurComplet(id) {
   return data;
 }
 
+// Motif de la dernière décision sur un fournisseur (vide si aucun ou si la migration 0014 n'est pas passée)
+export async function recupererMotifDecision(id) {
+  const { data, error } = await supabase.from('grossiste_decision').select('motif').eq('grossiste_id', id).maybeSingle();
+  if (error) return '';
+  return data?.motif || '';
+}
+
 export async function deciderFournisseur(id, statut, motif = null, badge = null) {
   const { error } = await supabase.rpc('admin_decider_fournisseur', { p_id: id, p_statut: statut, p_motif: motif, p_badge: badge });
   if (error) throw error;

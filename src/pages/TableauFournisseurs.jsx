@@ -7,11 +7,11 @@ export default function TableauDeBord() {
   if (!c) return <div className="loo-squelette" style={{ height: '260px' }} />;
 
   const aTraiter = [
-    { texte: 'Fournisseurs à valider', valeur: c.fournisseurs.en_attente, vers: '/a-traiter?onglet=fournisseurs', icone: Factory },
-    { texte: 'Produits à valider', valeur: c.produits.en_attente, vers: '/a-traiter?onglet=produits', icone: Package },
-    { texte: 'Documents à vérifier', valeur: c.documents_en_attente, vers: '/a-traiter?onglet=documents', icone: FileText },
-    { texte: 'Messages signalés', valeur: c.messages.signales, vers: '/a-traiter?onglet=messages', icone: AlertTriangle },
-    ...(c.affaires ? [{ texte: 'Affaires contestées', valeur: c.affaires.contestees, vers: '/affaires?filtre=contestee', icone: Handshake }] : []),
+    { texte: 'Fournisseurs à valider', valeur: c.fournisseurs.en_attente, vers: '/f/a-traiter?onglet=fournisseurs', icone: Factory },
+    { texte: 'Produits à valider', valeur: c.produits.en_attente, vers: '/f/a-traiter?onglet=produits', icone: Package },
+    { texte: 'Documents à vérifier', valeur: c.documents_en_attente, vers: '/f/a-traiter?onglet=documents', icone: FileText },
+    { texte: 'Messages signalés', valeur: c.messages.signales, vers: '/f/a-traiter?onglet=messages', icone: AlertTriangle },
+    ...(c.affaires ? [{ texte: 'Affaires contestées', valeur: c.affaires.contestees, vers: '/f/affaires?filtre=contestee', icone: Handshake }] : []),
   ];
   const total = aTraiter.reduce((n, a) => n + a.valeur, 0);
 
@@ -19,8 +19,8 @@ export default function TableauDeBord() {
     <>
       <div className="esp-bandeau">
         <div>
-          <h1>Administration LOOHOO</h1>
-          <p>{total > 0 ? `${total} élément${total > 1 ? 's' : ''} attend${total > 1 ? 'ent' : ''} votre décision.` : 'Rien en attente : tout est à jour.'}</p>
+          <h1>Espace Fournisseurs</h1>
+          <p>{total > 0 ? `${total} élément${total > 1 ? 's' : ''} attend${total > 1 ? 'ent' : ''} votre décision.` : "Rien en attente dans l'espace Fournisseurs : tout est à jour."}</p>
         </div>
         <div className="esp-kpis">
           <Kpi etiquette="Fournisseurs publiés" valeur={c.fournisseurs.publies} />

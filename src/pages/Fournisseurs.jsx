@@ -68,7 +68,7 @@ export default function Fournisseurs() {
                     <td><span className={`esp-puce ${st.classe}`}>{st.texte}</span></td>
                     <td>{publies}/{f.produit.length}</td>
                     <td>{formatDate(f.date_ajout)}</td>
-                    <td><Link to={`/fournisseurs/${f.id}`} className="btn btn-outline adm-bouton-petit">Ouvrir</Link></td>
+                    <td><Link to={`/f/fournisseurs/${f.id}`} className="btn btn-outline adm-bouton-petit">Ouvrir</Link></td>
                   </tr>
                 );
               })}
