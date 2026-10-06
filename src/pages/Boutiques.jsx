@@ -1,34 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { recupererStatsBoutiques } from '../api/admin.js';
-import { useSessionAdmin } from '../hooks/useSessionAdmin.js';
-import NavAdmin from '../components/NavAdmin.jsx';
+import { supabase } from '../supabaseClient.js';
 
 // Lien vers l'admin propre à chaque boutique (elles gardent leur propre interface)
 const LIENS_ADMIN = { medithe: 'https://medithe.looh-oo.com/admin' };
 
 export default function Boutiques() {
-  const { session, autorise } = useSessionAdmin();
   const [stats, setStats] = useState(undefined);
   const [erreur, setErreur] = useState('');
 
   useEffect(() => {
-    if (!autorise || !session) return;
-    recupererStatsBoutiques(session.access_token).then(setStats).catch((err) => setErreur(err.message));
-  }, [autorise, session]);
-
-  if (session === undefined || autorise === undefined) {
-    return <section className="section"><div className="container"><div className="loo-squelette" style={{ height: '200px' }} /></div></section>;
-  }
-  if (autorise === false) {
-    return <section className="section"><div className="container"><p>Ce compte n'a pas les droits d'administration.</p></div></section>;
-  }
+    supabase.auth.getSession()
+      .then(({ data }) => recupererStatsBoutiques(data.session.access_token))
+      .then(setStats)
+      .catch((err) => setErreur(err.message || 'Impossible de charger les statistiques des boutiques.'));
+  }, []);
 
   return (
     <section className="section">
       <div className="container">
-        <NavAdmin />
-        <h1 className="section-titre" style={{ marginTop: 0 }}>Boutiques</h1>
+        <h1 className="esp-titre-page">Boutiques</h1>
         <p className="section-intro" style={{ marginBottom: '1.6rem' }}>
           Chaque boutique garde sa propre interface d'administration ; cette vue n'est qu'un aperçu en lecture.
         </p>

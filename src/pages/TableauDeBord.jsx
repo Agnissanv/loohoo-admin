@@ -1,91 +1,78 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
-import { recupererFournisseurs, recupererStats } from '../api/admin.js';
-import { useSessionAdmin } from '../hooks/useSessionAdmin.js';
-import CarteFournisseurAdmin from '../components/CarteFournisseurAdmin.jsx';
-import NavAdmin from '../components/NavAdmin.jsx';
-
-const ONGLETS = [
-  { cle: 'en_attente', libelle: 'En attente' },
-  { cle: 'publie', libelle: 'Publiés' },
-  { cle: 'suspendu', libelle: 'Suspendus' },
-];
+import React from 'react';
+import { Link, useOutletContext } from 'react-router-dom';
+import { AlertTriangle, ClipboardCheck, Factory, FileText, MessageSquare, Package, ShieldCheck, Users } from 'lucide-react';
 
 export default function TableauDeBord() {
-  const { session, autorise } = useSessionAdmin();
-  const [fournisseurs, setFournisseurs] = useState(undefined);
-  const [stats, setStats] = useState(undefined);
-  const [onglet, setOnglet] = useState('en_attente');
-  const [erreur, setErreur] = useState('');
+  const { compteurs: c } = useOutletContext();
+  if (!c) return <div className="loo-squelette" style={{ height: '260px' }} />;
 
-  const recharger = useCallback(() => {
-    recupererFournisseurs().then(setFournisseurs).catch((err) => setErreur(err.message));
-    recupererStats().then(setStats).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (autorise) recharger();
-  }, [autorise, recharger]);
-
-  if (session === undefined || autorise === undefined) {
-    return <section className="section"><div className="container"><div className="loo-squelette" style={{ height: '200px' }} /></div></section>;
-  }
-  if (autorise === false) {
-    return <section className="section"><div className="container"><p>Ce compte n'a pas les droits d'administration.</p></div></section>;
-  }
-
-  const liste = (fournisseurs || []).filter((f) => f.statut === onglet);
+  const aTraiter = [
+    { texte: 'Fournisseurs à valider', valeur: c.fournisseurs.en_attente, vers: '/a-traiter?onglet=fournisseurs', icone: Factory },
+    { texte: 'Produits à valider', valeur: c.produits.en_attente, vers: '/a-traiter?onglet=produits', icone: Package },
+    { texte: 'Documents à vérifier', valeur: c.documents_en_attente, vers: '/a-traiter?onglet=documents', icone: FileText },
+    { texte: 'Messages signalés', valeur: c.messages.signales, vers: '/a-traiter?onglet=messages', icone: AlertTriangle },
+  ];
+  const total = aTraiter.reduce((n, a) => n + a.valeur, 0);
 
   return (
-    <section className="section">
-      <div className="container">
-        <NavAdmin />
-        <h1 className="section-titre" style={{ marginTop: 0 }}>Fournisseurs</h1>
-
-        {stats && (
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.8rem' }}>
-            <CarteStat titre="Fournisseurs" valeur={stats.grossistes_total} />
-            <CarteStat titre="Publiés" valeur={stats.grossistes_publies} />
-            <CarteStat titre="Vérifiés" valeur={stats.grossistes_verifies} />
-            <CarteStat titre="En attente" valeur={stats.grossistes_en_attente} />
-            <CarteStat titre="Produits" valeur={stats.produits_total} />
-            <CarteStat titre="Produits en attente" valeur={stats.produits_en_attente} />
-            <CarteStat titre="Contacts (7 j)" valeur={stats.contacts_7_jours} />
-          </div>
-        )}
-
-        {erreur && <p style={{ color: 'var(--loo-rouge)', fontWeight: 600 }}>{erreur}</p>}
-
-        <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.2rem' }}>
-          {ONGLETS.map((o) => (
-            <button
-              key={o.cle} type="button"
-              className={onglet === o.cle ? 'btn btn-primary' : 'btn btn-outline'}
-              style={{ padding: '0.5em 1.1em', fontSize: '0.85rem' }}
-              onClick={() => setOnglet(o.cle)}
-            >
-              {o.libelle} {fournisseurs && `(${fournisseurs.filter((f) => f.statut === o.cle).length})`}
-            </button>
-          ))}
+    <>
+      <div className="esp-bandeau">
+        <div>
+          <h1>Administration LOOHOO</h1>
+          <p>{total > 0 ? `${total} élément${total > 1 ? 's' : ''} attend${total > 1 ? 'ent' : ''} votre décision.` : 'Rien en attente : tout est à jour.'}</p>
         </div>
-
-        {fournisseurs === undefined && <div className="loo-squelette" style={{ height: '160px' }} />}
-        {fournisseurs && liste.length === 0 && <p style={{ opacity: 0.7 }}>Aucun fournisseur dans cette catégorie.</p>}
-
-        <div style={{ display: 'grid', gap: '0.8rem' }}>
-          {liste.map((f) => <CarteFournisseurAdmin key={f.id} f={f} onChange={recharger} />)}
+        <div className="esp-kpis">
+          <Kpi etiquette="Fournisseurs publiés" valeur={c.fournisseurs.publies} />
+          <Kpi etiquette="Produits publiés" valeur={c.produits.publies} />
+          <Kpi etiquette="Acheteurs" valeur={c.acheteurs.total} />
+          <Kpi etiquette="Demandes (7 j)" valeur={c.conversations.sept_jours} />
         </div>
       </div>
-    </section>
+
+      <h2 style={{ fontSize: '1.15rem', margin: '1.6rem 0 0.8rem' }}>À traiter</h2>
+      <div className="esp-kpis" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))' }}>
+        {aTraiter.map(({ texte, valeur, vers, icone: Icone }) => (
+          <Link key={texte} to={vers} className="esp-carte adm-kpi-lien" style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', borderColor: valeur ? 'var(--loo-orange)' : undefined }}>
+            <span style={{ width: 44, height: 44, borderRadius: 12, background: valeur ? '#FFF1E0' : 'var(--loo-papier)', color: 'var(--loo-rouge)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><Icone size={22} /></span>
+            <span><span style={{ display: 'block', fontFamily: 'var(--police-affiche)', fontWeight: 800, fontSize: '1.7rem', lineHeight: 1 }}>{valeur}</span><span style={{ fontSize: '0.84rem', opacity: 0.75 }}>{texte}</span></span>
+          </Link>
+        ))}
+      </div>
+
+      <div className="esp-grille esp-deux" style={{ marginTop: '1.4rem', alignItems: 'start' }}>
+        <div className="esp-carte">
+          <h2 className="esp-carte-titre"><span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}><ShieldCheck size={18} /> Surveillance</span></h2>
+          <Ligne texte="Demandes sans aucune réponse du fournisseur" valeur={c.conversations.sans_reponse} vers="/conversations" alerte={c.conversations.sans_reponse > 0} />
+          <Ligne texte="Produits avec coordonnées détectées" valeur={c.produits.drapeaux} vers="/produits?filtre=drapeaux" alerte={c.produits.drapeaux > 0} />
+          <Ligne texte="Fournisseurs avec coordonnées détectées" valeur={c.fournisseurs.drapeaux} vers="/fournisseurs" alerte={c.fournisseurs.drapeaux > 0} />
+          <Ligne texte="Produits publiés au stock non vérifié" valeur={c.produits.stock_non_verifie} vers="/produits?filtre=stock" />
+          <Ligne texte="Fournisseurs suspendus" valeur={c.fournisseurs.suspendus} vers="/fournisseurs?statut=suspendu" />
+        </div>
+        <div className="esp-carte">
+          <h2 className="esp-carte-titre"><span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}><MessageSquare size={18} /> Activité de la plateforme</span></h2>
+          <Ligne texte="Conversations ouvertes" valeur={c.conversations.total} vers="/conversations" />
+          <Ligne texte="Messages échangés" valeur={c.messages.total} />
+          <Ligne texte="Mises en relation enregistrées" valeur={c.mises_en_relation} />
+          <Ligne texte="Fournisseurs vérifiés (badge)" valeur={c.fournisseurs.verifies} vers="/fournisseurs" />
+          <Ligne texte="Leads collectés" valeur={c.leads} vers="/leads" />
+          <Ligne texte="Acheteurs inscrits" valeur={c.acheteurs.total} vers="/acheteurs" />
+        </div>
+      </div>
+      <p className="esp-aide" style={{ marginTop: '1rem' }}><ClipboardCheck size={13} style={{ verticalAlign: '-2px' }} /> Les compteurs se mettent à jour à chaque changement de page.</p>
+    </>
   );
 }
 
-function CarteStat({ titre, valeur }) {
-  return (
-    <div className="carte" style={{ padding: '0.9rem 1.2rem', minWidth: '110px' }}>
-      <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'var(--police-etiquette)' }}>{valeur}</div>
-      <div style={{ fontSize: '0.78rem', opacity: 0.7 }}>{titre}</div>
+function Kpi({ etiquette, valeur }) {
+  return <div className="esp-kpi"><div className="esp-kpi-etiquette">{etiquette}</div><div className="esp-kpi-valeur">{valeur}</div></div>;
+}
+
+function Ligne({ texte, valeur, vers, alerte }) {
+  const contenu = (
+    <div className="esp-liste-ligne">
+      <span style={{ fontSize: '0.92rem' }}>{texte}</span>
+      <strong style={{ color: alerte ? 'var(--loo-rouge)' : undefined }}>{valeur}</strong>
     </div>
   );
+  return vers ? <Link to={vers}>{contenu}</Link> : contenu;
 }
