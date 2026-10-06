@@ -23,6 +23,13 @@ export async function estAdmin() {
   return data;
 }
 
+// Vrai pour un super-administrateur (migration 0013). Avant cette migration, tous les administrateurs gardent leurs droits actuels.
+export async function estSuperAdmin() {
+  const { data, error } = await supabase.rpc('is_super_admin');
+  if (error) return true;
+  return !!data;
+}
+
 // La base renvoie la ligne de contact tantôt en liste, tantôt en objet seul (un seul contact par fournisseur)
 export function contactDe(fournisseur) {
   const brut = fournisseur?.grossiste_contact;
@@ -173,6 +180,78 @@ export async function ajouterNote(type, id, texte) {
 
 export async function supprimerNote(id) {
   const { error } = await supabase.from('note_admin').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ---- Affaires conclues et commissions (migration 0012) ----
+export async function recupererAffaires() {
+  const { data, error } = await supabase.from('affaire').select('*, commission(*)').order('date_declaration', { ascending: false }).limit(500);
+  if (error) throw error;
+  return data;
+}
+
+export async function trancherAffaire(id, statut, montant = null) {
+  const { error } = await supabase.rpc('admin_trancher_affaire', { p_id: id, p_statut: statut, p_montant: montant });
+  if (error) throw error;
+}
+
+export async function statutCommission(affaireId, statut, note = null) {
+  const { error } = await supabase.rpc('admin_statut_commission', { p_affaire_id: affaireId, p_statut: statut, p_note: note });
+  if (error) throw error;
+}
+
+export async function definirTaux(pourcent) {
+  const { error } = await supabase.rpc('admin_definir_taux', { p_pourcent: pourcent });
+  if (error) throw error;
+}
+
+// ---- Équipe d'administration (super-administrateur) ----
+export async function listeAdmins() {
+  const { data, error } = await supabase.rpc('admin_liste_admins');
+  if (error) throw error;
+  return data;
+}
+export async function ajouterAdmin(email, role) {
+  const { error } = await supabase.rpc('admin_ajouter_admin', { p_email: email, p_role: role });
+  if (error) throw error;
+}
+export async function changerRoleAdmin(userId, role) {
+  const { error } = await supabase.rpc('admin_changer_role', { p_user_id: userId, p_role: role });
+  if (error) throw error;
+}
+export async function retirerAdmin(userId) {
+  const { error } = await supabase.rpc('admin_retirer_admin', { p_user_id: userId });
+  if (error) throw error;
+}
+
+// ---- Catégories (super-administrateur) ----
+export async function recupererCategories() {
+  const { data, error } = await supabase.from('categorie').select('id, nom, ordre, active, sous_categorie(id, nom, ordre, active)').order('ordre');
+  if (error) throw error;
+  return data.map((c) => ({ ...c, sous_categorie: [...(c.sous_categorie || [])].sort((a, b) => a.ordre - b.ordre) }));
+}
+export async function creerCategorie(nom, ordre) {
+  const { error } = await supabase.from('categorie').insert({ nom: nom.trim(), ordre });
+  if (error) throw new Error(/duplicate|unique/i.test(error.message) ? 'Cette catégorie existe déjà.' : error.message);
+}
+export async function majCategorie(id, champs) {
+  const { error } = await supabase.from('categorie').update(champs).eq('id', id);
+  if (error) throw error;
+}
+export async function renommerCategorie(ancien, nouveau) {
+  const { error } = await supabase.rpc('admin_renommer_categorie', { p_ancien: ancien, p_nouveau: nouveau });
+  if (error) throw error;
+}
+export async function creerSousCategorie(categorieId, nom, ordre) {
+  const { error } = await supabase.from('sous_categorie').insert({ categorie_id: categorieId, nom: nom.trim(), ordre });
+  if (error) throw new Error(/duplicate|unique/i.test(error.message) ? 'Cette sous-catégorie existe déjà.' : error.message);
+}
+export async function majSousCategorie(id, champs) {
+  const { error } = await supabase.from('sous_categorie').update(champs).eq('id', id);
+  if (error) throw error;
+}
+export async function renommerSousCategorie(categorie, ancien, nouveau) {
+  const { error } = await supabase.rpc('admin_renommer_sous_categorie', { p_categorie: categorie, p_ancien: ancien, p_nouveau: nouveau });
   if (error) throw error;
 }
 

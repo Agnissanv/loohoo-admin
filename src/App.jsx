@@ -9,8 +9,11 @@ import FicheFournisseur from './pages/FicheFournisseur.jsx';
 import Produits from './pages/Produits.jsx';
 import Acheteurs from './pages/Acheteurs.jsx';
 import Conversations from './pages/Conversations.jsx';
+import Affaires from './pages/Affaires.jsx';
 import Leads from './pages/Leads.jsx';
 import Journal from './pages/Journal.jsx';
+import Categories from './pages/Categories.jsx';
+import Equipe from './pages/Equipe.jsx';
 import Boutiques from './pages/Boutiques.jsx';
 
 export default function App() {
@@ -26,9 +29,12 @@ export default function App() {
         <Route path="/acheteurs" element={<Acheteurs />} />
         <Route path="/conversations" element={<Conversations />} />
         <Route path="/conversations/:id" element={<Conversations />} />
+        <Route path="/affaires" element={<Affaires />} />
         <Route path="/leads" element={<Leads />} />
         <Route path="/boutiques" element={<Boutiques />} />
         <Route path="/journal" element={<Journal />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/equipe" element={<Equipe />} />
       </Route>
     </Routes>
   );

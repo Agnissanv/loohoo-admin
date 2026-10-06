@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ClipboardCheck, Factory, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Package, ScrollText, Store, Users, X,
+  ClipboardCheck, Factory, Handshake, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Package, ScrollText, Settings, Store, Tags, Users, X,
 } from 'lucide-react';
-import { deconnecterAdmin, suivreSession, estAdmin, tableauDeBord } from '../api/admin.js';
+import { deconnecterAdmin, suivreSession, estAdmin, estSuperAdmin, tableauDeBord } from '../api/admin.js';
 import { initiales } from '../utils/format.js';
 
 const LIENS = [
@@ -13,9 +13,12 @@ const LIENS = [
   { vers: '/produits', texte: 'Produits', icone: Package },
   { vers: '/acheteurs', texte: 'Acheteurs', icone: Users },
   { vers: '/conversations', texte: 'Conversations', icone: MessageSquare },
+  { vers: '/affaires', texte: 'Affaires et commissions', icone: Handshake },
   { vers: '/leads', texte: 'Leads', icone: Mail },
   { vers: '/boutiques', texte: 'Boutiques', icone: Store },
   { vers: '/journal', texte: "Journal d'audit", icone: ScrollText },
+  { vers: '/categories', texte: 'Catégories', icone: Tags, superSeulement: true },
+  { vers: '/equipe', texte: 'Équipe', icone: Settings, superSeulement: true },
 ];
 
 // Cadre de l'administration : accès réservé aux comptes de la table admins
@@ -24,6 +27,7 @@ export default function LayoutAdmin() {
   const { pathname } = useLocation();
   const [session, setSession] = useState(undefined);
   const [autorise, setAutorise] = useState(undefined);
+  const [superAdmin, setSuperAdmin] = useState(false);
   const [compteurs, setCompteurs] = useState(null);
   const [menuOuvert, setMenuOuvert] = useState(false);
 
@@ -33,6 +37,7 @@ export default function LayoutAdmin() {
     if (session === undefined) return;
     if (session === null) { navigate('/connexion'); return; }
     estAdmin().then(setAutorise).catch(() => setAutorise(false));
+    estSuperAdmin().then(setSuperAdmin);
   }, [session, navigate]);
 
   const rafraichir = useCallback(() => tableauDeBord().then(setCompteurs).catch(() => {}), []);
@@ -57,7 +62,7 @@ export default function LayoutAdmin() {
   }
 
   const aTraiter = compteurs
-    ? compteurs.fournisseurs.en_attente + compteurs.produits.en_attente + compteurs.documents_en_attente + compteurs.messages.signales
+    ? compteurs.fournisseurs.en_attente + compteurs.produits.en_attente + compteurs.documents_en_attente + compteurs.messages.signales + (compteurs.affaires?.contestees || 0)
     : 0;
 
   return (
@@ -73,6 +78,7 @@ export default function LayoutAdmin() {
           <span className="esp-marque-titre">Administration</span>
         </div>
         <div className="esp-haut-droite">
+          <span className="esp-puce esp-puce-neutre" title="Votre rôle">{superAdmin ? 'Super-admin' : 'Modérateur'}</span>
           <span className="esp-avatar" title={session.user.email}>{initiales(session.user.email)}</span>
           <span className="esp-nom">{session.user.email}</span>
           <button type="button" className="esp-bouton-icone" aria-label="Se déconnecter" title="Se déconnecter" onClick={() => deconnecterAdmin().then(() => navigate('/connexion'))}>
@@ -83,7 +89,7 @@ export default function LayoutAdmin() {
 
       <div className="esp-corps">
         <nav className="esp-menu" aria-label="Administration">
-          {LIENS.map(({ vers, texte, icone: Icone, pastille, fin }) => (
+          {LIENS.filter((lien) => !lien.superSeulement || superAdmin).map(({ vers, texte, icone: Icone, pastille, fin }) => (
             <NavLink key={vers} to={vers} end={fin} className={({ isActive }) => `esp-lien${isActive ? ' esp-lien-actif' : ''}`}>
               <Icone size={19} /> {texte}
               {pastille && aTraiter > 0 && <span className="esp-pastille">{aTraiter > 99 ? '99+' : aTraiter}</span>}
@@ -92,7 +98,7 @@ export default function LayoutAdmin() {
         </nav>
         <div className="esp-voile" onClick={() => setMenuOuvert(false)} />
         <main className="esp-contenu">
-          <Outlet context={{ compteurs, rafraichir }} />
+          <Outlet context={{ compteurs, rafraichir, superAdmin }} />
         </main>
       </div>
     </div>

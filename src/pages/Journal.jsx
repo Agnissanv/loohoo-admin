@@ -11,11 +11,24 @@ const ACTIONS = {
   produit_statut: "Statut d'un produit",
   produit_stock: 'Vérification du stock',
   document_statut: "Statut d'un document",
+  affaire_statut: "Statut d'une affaire",
+  commission_statut: 'Commission',
+  taux_commission: 'Taux de commission',
+  admin_ajout: "Ajout d'un administrateur",
+  admin_role: "Rôle d'un administrateur",
+  admin_retrait: "Retrait d'un administrateur",
+  categorie_renommee: 'Catégorie renommée',
 };
 
 function resume(l) {
   const d = l.details || {};
   if (l.action === 'produit_stock') return `${d.nom || ''} : stock ${d.verifie ? 'vérifié' : 'retiré'}`;
+  if (l.action === 'admin_ajout') return `${d.email} (${d.role})`;
+  if (l.action === 'admin_role') return `Nouveau rôle : ${d.role}`;
+  if (l.action === 'admin_retrait') return 'Accès retiré';
+  if (l.action === 'categorie_renommee') return `${d.avant} → ${d.apres}`;
+  if (l.action === 'taux_commission') return `${d.avant} % → ${d.apres} %`;
+  if (l.action === 'affaire_statut') return `${d.acheteur || ''} / ${d.fournisseur || ''} : ${d.avant} → ${d.apres} (${Number(d.montant || 0).toLocaleString('fr-FR')} F CFA)`;
   if (l.action === 'document_statut') return `${d.statut}${d.motif ? ` (${d.motif})` : ''}`;
   const base = `${d.nom ? `${d.nom} : ` : ''}${String(d.avant)} → ${String(d.apres)}`;
   return d.motif ? `${base} (${d.motif})` : base;

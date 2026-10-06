@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { AlertTriangle, ClipboardCheck, Factory, FileText, MessageSquare, Package, ShieldCheck, Users } from 'lucide-react';
+import { AlertTriangle, ClipboardCheck, Factory, FileText, Handshake, MessageSquare, Package, ShieldCheck } from 'lucide-react';
 
 export default function TableauDeBord() {
   const { compteurs: c } = useOutletContext();
@@ -11,6 +11,7 @@ export default function TableauDeBord() {
     { texte: 'Produits à valider', valeur: c.produits.en_attente, vers: '/a-traiter?onglet=produits', icone: Package },
     { texte: 'Documents à vérifier', valeur: c.documents_en_attente, vers: '/a-traiter?onglet=documents', icone: FileText },
     { texte: 'Messages signalés', valeur: c.messages.signales, vers: '/a-traiter?onglet=messages', icone: AlertTriangle },
+    ...(c.affaires ? [{ texte: 'Affaires contestées', valeur: c.affaires.contestees, vers: '/affaires?filtre=contestee', icone: Handshake }] : []),
   ];
   const total = aTraiter.reduce((n, a) => n + a.valeur, 0);
 
@@ -54,6 +55,8 @@ export default function TableauDeBord() {
           <Ligne texte="Messages échangés" valeur={c.messages.total} />
           <Ligne texte="Mises en relation enregistrées" valeur={c.mises_en_relation} />
           <Ligne texte="Fournisseurs vérifiés (badge)" valeur={c.fournisseurs.verifies} vers="/fournisseurs" />
+          {c.affaires && <Ligne texte="Affaires confirmées" valeur={c.affaires.confirmees} vers="/affaires?filtre=confirmee" />}
+          {c.affaires && <Ligne texte="Commission à facturer (F CFA)" valeur={Number(c.affaires.commission_a_facturer).toLocaleString('fr-FR')} vers="/affaires?filtre=confirmee" alerte={c.affaires.commission_a_facturer > 0} />}
           <Ligne texte="Leads collectés" valeur={c.leads} vers="/leads" />
           <Ligne texte="Acheteurs inscrits" valeur={c.acheteurs.total} vers="/acheteurs" />
         </div>
