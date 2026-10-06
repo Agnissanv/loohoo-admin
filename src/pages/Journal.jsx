@@ -69,7 +69,7 @@ export default function Journal() {
                   <td style={{ whiteSpace: 'nowrap' }}>{formatDateHeure(l.date_action)}</td>
                   <td><strong>{ACTIONS[l.action] || l.action}</strong></td>
                   <td>{resume(l)}</td>
-                  <td>{l.cible_type === 'grossiste' ? <Link to={`/fournisseurs/${l.cible_id}`} style={{ textDecoration: 'underline' }}>Fournisseur</Link> : l.cible_type}</td>
+                  <td>{l.cible_type === 'grossiste' ? <Link to={`/f/fournisseurs/${l.cible_id}`} style={{ textDecoration: 'underline' }}>Fournisseur</Link> : l.cible_type}</td>
                   <td className="esp-aide" title={l.admin_id}>{String(l.admin_id || '').slice(0, 8)}</td>
                 </tr>
               ))}

@@ -3,7 +3,7 @@ import { Link, useOutletContext, useParams } from 'react-router-dom';
 import { ArrowLeft, BadgeCheck, Check, Eye, MapPin, Phone, Trash2, X } from 'lucide-react';
 import {
   recupererFournisseurComplet, deciderFournisseur, modererProduit, verifierStock, deciderDocument, lienDocument,
-  recupererNotes, ajouterNote, supprimerNote, recupererJournalCible, recupererConversations, contactDe,
+  recupererNotes, ajouterNote, supprimerNote, recupererJournalCible, recupererConversations, recupererMotifDecision, contactDe,
 } from '../api/admin.js';
 import MotifModal from '../components/MotifModal.jsx';
 import {
@@ -27,6 +27,7 @@ export default function FicheFournisseur() {
   const [notes, setNotes] = useState([]);
   const [journal, setJournal] = useState([]);
   const [conversations, setConversations] = useState([]);
+  const [motif, setMotif] = useState('');
   const [erreur, setErreur] = useState('');
   const [modal, setModal] = useState(null); // { type: 'suspendre' | 'produit', produit? }
   const [nouvelleNote, setNouvelleNote] = useState('');
@@ -36,6 +37,7 @@ export default function FicheFournisseur() {
       const fiche = await recupererFournisseurComplet(id);
       setF(fiche);
       recupererNotes('grossiste', id).then(setNotes).catch(() => {});
+      recupererMotifDecision(id).then(setMotif);
       recupererJournalCible('grossiste', id).then(setJournal).catch(() => {});
       recupererConversations().then((l) => setConversations(l.filter((c) => c.grossiste?.id === id))).catch(() => {});
     } catch (err) {
@@ -47,7 +49,7 @@ export default function FicheFournisseur() {
   useEffect(() => { charger(); }, [charger]);
 
   if (f === undefined) return <div className="loo-squelette" style={{ height: '300px' }} />;
-  if (!f) return <><p style={{ color: 'var(--loo-rouge)', fontWeight: 600 }}>{erreur || 'Fournisseur introuvable.'}</p><Link to="/fournisseurs" className="btn btn-outline">Retour</Link></>;
+  if (!f) return <><p style={{ color: 'var(--loo-rouge)', fontWeight: 600 }}>{erreur || 'Fournisseur introuvable.'}</p><Link to="/f/fournisseurs" className="btn btn-outline">Retour</Link></>;
 
   const contact = contactDe(f);
   const reseaux = contact.reseaux_sociaux || f.reseaux_sociaux || {};
@@ -83,7 +85,7 @@ export default function FicheFournisseur() {
 
   return (
     <>
-      <Link to="/fournisseurs" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, fontSize: '0.88rem', color: 'var(--loo-rouge)', marginBottom: '0.8rem' }}><ArrowLeft size={15} /> Fournisseurs</Link>
+      <Link to="/f/fournisseurs" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, fontSize: '0.88rem', color: 'var(--loo-rouge)', marginBottom: '0.8rem' }}><ArrowLeft size={15} /> Fournisseurs</Link>
 
       {/* En-tête et décisions */}
       <div className="esp-carte" style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -100,7 +102,7 @@ export default function FicheFournisseur() {
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><MapPin size={14} /> {f.commune ? `${f.commune}, ` : ''}{f.ville}</span>
             <span>{f.categorie}</span><span>Inscrit le {formatDate(f.date_ajout)}</span>
           </div>
-          {contact.motif_statut && f.statut !== 'publie' && <p style={{ margin: '0.5rem 0 0', fontSize: '0.88rem', color: 'var(--loo-rouge)' }}>Motif en cours : {contact.motif_statut}</p>}
+          {motif && f.statut !== 'publie' && <p style={{ margin: '0.5rem 0 0', fontSize: '0.88rem', color: 'var(--loo-rouge)' }}>Motif en cours : {motif}</p>}
         </div>
         <div className="adm-actions" style={{ flexDirection: 'column', alignItems: 'stretch', minWidth: '210px' }}>
           {f.statut !== 'publie' && (
@@ -239,7 +241,7 @@ export default function FicheFournisseur() {
             {conversations.slice(0, 8).map((c) => {
               const nbSignales = (c.message || []).filter((m) => m.signale && !m.signale_traite).length;
               return (
-                <Link key={c.id} to={`/conversations/${c.id}`} className="esp-liste-ligne">
+                <Link key={c.id} to={`/f/conversations/${c.id}`} className="esp-liste-ligne">
                   <span style={{ fontSize: '0.9rem' }}><strong>{c.vendeur?.nom || 'Acheteur'}</strong>{c.produit?.nom ? ` · ${c.produit.nom}` : ''}</span>
                   <span style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                     {nbSignales > 0 && <span className="esp-puce esp-puce-orange">{nbSignales} signalé{nbSignales > 1 ? 's' : ''}</span>}

@@ -52,7 +52,7 @@ export default function Conversations() {
           <div className="msg-liste-corps">
             {visibles.length === 0 && <p style={{ padding: '1.2rem', opacity: 0.7, fontSize: '0.9rem', margin: 0 }}>Aucune conversation.</p>}
             {visibles.map((c) => (
-              <Link key={c.id} to={`/conversations/${c.id}`} className={`msg-ligne${c.id === id ? ' msg-ligne-active' : ''}`}>
+              <Link key={c.id} to={`/f/conversations/${c.id}`} className={`msg-ligne${c.id === id ? ' msg-ligne-active' : ''}`}>
                 <span className="esp-avatar" style={{ width: 42, height: 42, flexShrink: 0 }}>{initiales(c.vendeur?.nom)}</span>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
@@ -96,10 +96,10 @@ function Fil({ c, onChange }) {
   return (
     <>
       <header className="msg-fil-haut">
-        <Link to="/conversations" className="msg-retour" aria-label="Retour"><ArrowLeft size={20} /></Link>
+        <Link to="/f/conversations" className="msg-retour" aria-label="Retour"><ArrowLeft size={20} /></Link>
         <span className="esp-avatar" style={{ width: 42, height: 42 }}>{initiales(c.vendeur?.nom)}</span>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <strong>{c.vendeur?.nom || 'Acheteur'} → <Link to={`/fournisseurs/${c.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{c.grossiste?.nom}</Link></strong>
+          <strong>{c.vendeur?.nom || 'Acheteur'} → <Link to={`/f/fournisseurs/${c.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{c.grossiste?.nom}</Link></strong>
           <div style={{ fontSize: '0.8rem', opacity: 0.65 }}>{c.vendeur?.activite || 'Acheteur'}{c.produit?.nom ? ` · à propos de ${c.produit.nom}` : ''}</div>
         </div>
         <span className="esp-puce esp-puce-neutre">Lecture seule</span>

@@ -20,7 +20,7 @@ export default function Boutiques() {
   return (
     <section className="section">
       <div className="container">
-        <h1 className="esp-titre-page">Boutiques</h1>
+        <h1 className="esp-titre-page">Boutiques connectées</h1>
         <p className="section-intro" style={{ marginBottom: '1.6rem' }}>
           Chaque boutique garde sa propre interface d'administration ; cette vue n'est qu'un aperçu en lecture.
         </p>

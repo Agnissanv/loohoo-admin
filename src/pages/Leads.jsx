@@ -9,18 +9,18 @@ const dateDe = (l) => l.date || l.created_at || l.date_creation || null;
 
 export default function Leads() {
   const { donnees, erreur } = useAdminDonnees(recupererLeads);
-  const liste = useMemo(() => [...(donnees || [])].sort((a, b) => new Date(dateDe(b) || 0) - new Date(dateDe(a) || 0)), [donnees]);
+  const liste = useMemo(() => [...(donnees || [])].filter((l) => !String(l.recherche || '').startsWith('landing-')).sort((a, b) => new Date(dateDe(b) || 0) - new Date(dateDe(a) || 0)), [donnees]);
 
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.6rem' }}>
-        <h1 className="esp-titre-page" style={{ margin: 0 }}>Leads{donnees ? ` (${donnees.length})` : ''}</h1>
+        <h1 className="esp-titre-page" style={{ margin: 0 }}>Leads des acheteurs{donnees ? ` (${liste.length})` : ''}</h1>
         <button type="button" className="btn btn-outline" disabled={!liste.length} onClick={() => exporterCsv('leads', [
           { titre: 'E-mail', valeur: (l) => l.email }, { titre: 'Recherche ou besoin', valeur: (l) => l.recherche }, { titre: 'Date', valeur: (l) => formatDateHeure(dateDe(l)) },
         ], liste)}><Download size={16} /> Exporter</button>
       </div>
       <p className="esp-aide" style={{ marginBottom: '1rem', maxWidth: '70ch' }}>
-        E-mails laissés par des visiteurs : sortie de page, demandes de sourcing sans résultat, ou intérêt pour la création de boutique. À utiliser dans le respect de la politique de confidentialité.
+        E-mails laissés par des visiteurs de la plateforme fournisseurs : sortie de page et demandes de sourcing restées sans résultat. Les demandes de création de boutique sont dans l'espace Boutiques. À utiliser dans le respect de la politique de confidentialité.
       </p>
       {erreur && <p role="alert" style={{ color: 'var(--loo-rouge)', fontWeight: 600 }}>{erreur}</p>}
       {donnees === undefined && <div className="loo-squelette" style={{ height: '200px' }} />}

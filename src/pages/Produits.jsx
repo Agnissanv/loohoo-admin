@@ -80,7 +80,7 @@ export default function Produits() {
                           <div className="esp-aide">{p.categorie}</div></div>
                       </div>
                     </td>
-                    <td><Link to={`/fournisseurs/${p.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{p.grossiste?.nom}</Link></td>
+                    <td><Link to={`/f/fournisseurs/${p.grossiste?.id}`} style={{ textDecoration: 'underline' }}>{p.grossiste?.nom}</Link></td>
                     <td>{formatPrix(p.prix_gros_fcfa)}<div className="esp-aide">min. {p.moq}</div></td>
                     <td>{p.stock_disponible ?? '–'}{' '}
                       {p.stock_disponible != null && (p.stock_verifie_le ? <span className="esp-puce esp-puce-vert">vérifié</span> : <span className="esp-puce esp-puce-neutre">non vérifié</span>)}</td>
