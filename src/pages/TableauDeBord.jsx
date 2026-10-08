@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   BadgeCheck, Check, ChevronDown, ChevronUp, ExternalLink, Lock, Search, Store, X,
 } from 'lucide-react';
@@ -165,16 +166,16 @@ export default function TableauDeBord() {
                 </span>
               </div>
               <div className="loo-admin-raccourcis">
-                <div className="loo-admin-raccourci">
+                <Link className="loo-admin-raccourci" to="/fournisseurs">
                   <Store size={16} />
                   <span>Fournisseurs</span>
                   <strong>{stats ? stats.grossistes_total : '…'}</strong>
-                </div>
-                <div className="loo-admin-raccourci">
+                </Link>
+                <Link className="loo-admin-raccourci" to="/boutiques">
                   <Lock size={16} />
                   <span>Boutiques</span>
                   <strong>{boutiques ? boutiques.length : '…'}</strong>
-                </div>
+                </Link>
               </div>
             </div>
 
@@ -187,10 +188,10 @@ export default function TableauDeBord() {
               <div className="loo-admin-kpis">
                 {stats ? (
                   <>
-                    <Kpi libelle="Fournisseurs" valeur={stats.grossistes_total} />
-                    <Kpi libelle="Publiés" valeur={stats.grossistes_publies} />
-                    <Kpi libelle="Vérifiés" valeur={stats.grossistes_verifies} />
-                    <Kpi libelle="En attente" valeur={stats.grossistes_en_attente} accent />
+                    <Kpi libelle="Fournisseurs" valeur={stats.grossistes_total} to="/fournisseurs" />
+                    <Kpi libelle="Publiés" valeur={stats.grossistes_publies} to="/fournisseurs" />
+                    <Kpi libelle="Vérifiés" valeur={stats.grossistes_verifies} to="/fournisseurs" />
+                    <Kpi libelle="En attente" valeur={stats.grossistes_en_attente} accent to="/fournisseurs/en-attente" />
                     <Kpi libelle="Produits" valeur={stats.produits_total} />
                     <Kpi libelle="Produits en attente" valeur={stats.produits_en_attente} accent />
                     <Kpi libelle="Contacts (7 j)" valeur={stats.contacts_7_jours} />
@@ -288,6 +289,7 @@ export default function TableauDeBord() {
                 <h2 className="loo-admin-etiquette">File d'action</h2>
                 <span className="loo-admin-source loo-admin-source-reelle">base réelle</span>
                 <span className="loo-admin-compteur">{fournisseurs ? fournisseurs.length : '…'}</span>
+                <Link className="loo-admin-lien" to="/fournisseurs">Voir la file complète ›</Link>
               </div>
 
               <article className="loo-admin-carte">
@@ -455,6 +457,7 @@ export default function TableauDeBord() {
               <p className="loo-admin-note">
                 Par type : {D.litiges.parType.map((t) => `${t.libelle} ${t.valeur}`).join(' · ')}
               </p>
+              <Link className="loo-admin-lien" to="/service-client">Ouvrir le service client &amp; litiges ›</Link>
             </article>
 
             <article className="loo-admin-carte">
@@ -464,6 +467,7 @@ export default function TableauDeBord() {
                 <div className="loo-admin-mini"><strong>{D.alertesStock.enVerification}</strong><span>En vérification</span></div>
                 <div className="loo-admin-mini"><strong>{D.alertesStock.resolues}</strong><span>Résolues (7 j)</span></div>
               </div>
+              <Link className="loo-admin-lien" to="/service-client">Voir les alertes stock ›</Link>
             </article>
 
             <article className="loo-admin-carte">
@@ -542,6 +546,7 @@ export default function TableauDeBord() {
               <h3 className="loo-admin-carte-titre">Aperçu — espace modérateur <span className="loo-admin-source">fictif</span></h3>
               <p className="loo-admin-apercu-titre">{D.apercu.titre}</p>
               <p className="loo-admin-note">{D.apercu.texte}</p>
+              <Link className="loo-admin-lien" to="/moderateur">Ouvrir l’espace modérateur ›</Link>
             </article>
           </aside>
         </div>
@@ -550,13 +555,22 @@ export default function TableauDeBord() {
   );
 }
 
-function Kpi({ libelle, valeur, accent }) {
-  return (
-    <div className={accent ? 'loo-admin-kpi loo-admin-kpi-accent' : 'loo-admin-kpi'}>
+function Kpi({ libelle, valeur, accent, to }) {
+  const classe = accent ? 'loo-admin-kpi loo-admin-kpi-accent' : 'loo-admin-kpi';
+  const contenu = (
+    <>
       <strong>{valeur}</strong>
       <span>{libelle}</span>
-    </div>
+    </>
   );
+  if (to) {
+    return (
+      <Link className={classe} to={to}>
+        {contenu}
+      </Link>
+    );
+  }
+  return <div className={classe}>{contenu}</div>;
 }
 
 // Courbe du chiffre d'affaires : dessin d'après les valeurs reçues, aucune donnée lue.

@@ -47,6 +47,12 @@ npm run build      # vérif avant commit (doit passer)
     Service client / Boutiques 🔒 — verrou visuel seulement pour l'instant).
   - Valeurs des écrans isolées dans `src/api/donnees-espaces.js` (mêmes règles que
     `donnees-fictives.js`) ; styles dans `src/admin-espaces.css`.
+- **Liaisons entre écrans — câblées le 09/10/2026** (inventaire complet :
+  [`PLAN-DE-LIAISONS.md`](./PLAN-DE-LIAISONS.md)) : les sections/lignes qui mènent à un
+  écran existant sont de vrais liens (`<Link>`), plus des blocs inertes. Nouvelle page
+  `src/pages/FileValidation.jsx` → route **`/fournisseurs/en-attente`** (« 🏭 6 Fournisseurs
+  à valider » des maquettes n02/n03). Composant `src/components/ItemEspace.jsx` = ligne
+  « bouton si aucune cible, lien sinon » ; styles dans `src/admin-liaisons.css`.
 - Blocs **sans source de données** clairement marqués « fictif » à l'écran, valeurs
   isolées dans un seul fichier : `src/api/donnees-fictives.js` (aucune lecture en base).
 - Le bandeau en haut de page rappelle que ces blocs ne sont branchés sur rien.
@@ -73,7 +79,10 @@ npm run build      # vérif avant commit (doit passer)
 8. **Ouvrir les écrans intermédiaires** annoncés par les maquettes (détail fournisseur,
    file d'attente complète avec recherche, conversation complète d'un litige, « À traiter »,
    Produits, Acheteurs, Conversations, Affaires & abonnements, Leads, Catégories,
-   Journal d'audit, Équipe & rôles). Aujourd'hui les lignes cliquables n'ouvrent rien.
+   Journal d'audit, Équipe & rôles). **État des liaisons : [`PLAN-DE-LIAISONS.md`](./PLAN-DE-LIAISONS.md)**
+   — au 09/10/2026 toutes les liaisons dont la page existe sont câblées (voir ci-dessus) ;
+   celles qui pointent vers une page encore inexistante **restent volontairement en attente**
+   (on ne renvoie personne vers du contenu générique).
 
 ## Règles à respecter (rappel)
 

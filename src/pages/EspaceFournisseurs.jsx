@@ -2,6 +2,7 @@ import React from 'react';
 import NavAdmin from '../components/NavAdmin.jsx';
 import EnTeteAdmin from '../components/EnTeteAdmin.jsx';
 import BandeauFictif from '../components/BandeauFictif.jsx';
+import ItemEspace from '../components/ItemEspace.jsx';
 import CourbeOnglets from '../components/CourbeOnglets.jsx';
 import { DONNEES_ESPACES } from '../api/donnees-espaces.js';
 
@@ -41,28 +42,28 @@ export default function EspaceFournisseurs() {
         <p className="loo-esp-titre">À traiter</p>
         <div className="loo-esp-liste">
           {d.aTraiter.map((l) => (
-            <button type="button" className="loo-esp-item" key={l.libelle}>
+            <ItemEspace key={l.libelle} to={l.to}>
               <span className="loo-esp-item-ic alerte">{l.icone}</span>
               <span className="loo-esp-item-txt">
                 <b className="loo-esp-item-n">{l.valeur}</b>
                 <span className="loo-esp-item-l">{l.libelle}</span>
               </span>
               <span className="loo-esp-chevron">›</span>
-            </button>
+            </ItemEspace>
           ))}
         </div>
 
         <p className="loo-esp-titre">Aperçu rapide</p>
         <div className="loo-esp-liste">
           {d.apercu.map((l) => (
-            <button type="button" className="loo-esp-item" key={l.libelle}>
+            <ItemEspace key={l.libelle} to={l.to}>
               <span className="loo-esp-item-ic">{l.icone}</span>
               <span className="loo-esp-item-txt">
                 <b className="loo-esp-item-n">{l.valeur}</b>
                 <span className="loo-esp-item-l">{l.libelle}</span>
               </span>
               <span className="loo-esp-chevron">›</span>
-            </button>
+            </ItemEspace>
           ))}
         </div>
 

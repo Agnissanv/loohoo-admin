@@ -1,0 +1,57 @@
+/* Liaisons entre écrans (js) — les lignes/sections cliquables sont des <Link>,
+   pas des boutons inertes : on neutralise le style lien et on garde la mise en page. */
+
+a.loo-admin-raccourci,
+a.loo-admin-kpi,
+a.loo-esp-item,
+a.loo-esp-lien {
+  color: inherit;
+  text-decoration: none;
+  text-align: left;
+  font: inherit;
+}
+
+a.loo-admin-raccourci:hover,
+a.loo-admin-kpi:hover,
+a.loo-esp-item:hover {
+  text-decoration: none;
+}
+
+/* Lien de section (« Voir la file complète › », « Ouvrir › ») */
+.loo-admin-lien,
+.loo-esp-lien {
+  display: inline-block;
+  margin-top: 0.55rem;
+  font-family: var(--police-etiquette, inherit);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: none;
+}
+
+.loo-admin-lien:hover,
+.loo-esp-lien:hover {
+  text-decoration: underline;
+}
+
+/* File de validation des fournisseurs */
+.loo-esp-bloc { display: block; }
+
+.loo-esp-recherche {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loo-esp-bloc .loo-esp-sombre { margin-top: 0.6rem; }
+
+.loo-esp-item-tag i { font-style: normal; }
+
+/* Étiquette « ↻ resoumis » : lisible, pas en majuscules */
+.loo-esp-item .loo-esp-item-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+}

@@ -63,12 +63,12 @@ export const DONNEES_ESPACES = {
       },
     ],
     aTraiter: [
-      { icone: '🏭', valeur: '6', libelle: 'Fournisseurs à valider' },
-      { icone: '🤝', valeur: '2', libelle: 'Litiges en attente' },
+      { icone: '🏭', valeur: '6', libelle: 'Fournisseurs à valider', to: '/fournisseurs/en-attente' },
+      { icone: '🤝', valeur: '2', libelle: 'Litiges en attente', to: '/service-client' },
       { icone: '⚠️', valeur: '2', libelle: 'Coordonnées détectées' },
     ],
     apercu: [
-      { icone: '📈', valeur: '612 000 FCFA', libelle: 'Revenu LOOHOO ce mois (+9 %)' },
+      { icone: '📈', valeur: '612 000 FCFA', libelle: 'Revenu LOOHOO ce mois (+9 %)', to: '/' },
       { icone: '🔗', valeur: '23 / 7', libelle: 'Filleuls actifs — acheteurs / fournisseurs' },
     ],
     note:
@@ -107,10 +107,10 @@ export const DONNEES_ESPACES = {
       ],
     },
     file: [
-      { icone: '🏭', valeur: '6', libelle: 'Fournisseurs à vérifier' },
-      { icone: '⏱️', valeur: '1', libelle: '⚠ en attente depuis 48 h', urgent: true },
+      { icone: '🏭', valeur: '6', libelle: 'Fournisseurs à vérifier', to: '/fournisseurs/en-attente' },
+      { icone: '⏱️', valeur: '1', libelle: '⚠ en attente depuis 48 h', urgent: true, to: '/fournisseurs/en-attente' },
     ],
-    publies: { valeur: '340', libelle: 'Fournisseurs actifs — rechercher pour suspendre si besoin' },
+    publies: { valeur: '340', libelle: 'Fournisseurs actifs — rechercher pour suspendre si besoin', to: '/fournisseurs' },
     commerciaux: { valeur: '2', libelle: 'Commerciaux terrain actifs' },
     note:
       'Chaque ligne ci-dessus s’ouvre dans son propre écran : file d’attente '
@@ -153,6 +153,42 @@ export const DONNEES_ESPACES = {
       'Chaque dossier s’ouvre dans son propre écran avec l’historique complet de la '
       + 'conversation. Les décisions sont journalisées et visibles par le super-admin '
       + 'sous forme de chiffres agrégés uniquement.',
+  },
+
+  /* ---------- File de validation des fournisseurs (/fournisseurs/en-attente) ---------- */
+  validation: {
+    titre: 'File de validation',
+    resume: 'Dossiers de fournisseurs en attente de décision.',
+    dossiers: [
+      {
+        nom: 'Bazin Mania', pays: '🇲🇱 Bamako, Mali', categorie: 'Textile',
+        soumis: 'Il y a 4 h', recrutePar: 'Jean K. (commercial)', resoumission: true,
+      },
+      {
+        nom: 'Sika Beauty', pays: '🇨🇮 Abidjan, Côte d’Ivoire', categorie: 'Cosmétiques',
+        soumis: 'Il y a 7 h', recrutePar: 'Jean K. (commercial)',
+      },
+      {
+        nom: 'Électro Plus CI', pays: '🇨🇮 Abidjan, Côte d’Ivoire', categorie: 'Électronique',
+        soumis: 'Hier', recrutePar: 'Inscription directe',
+      },
+      {
+        nom: 'Koné Textiles', pays: '🇲🇱 Bamako, Mali', categorie: 'Textile',
+        soumis: 'Hier', recrutePar: 'Jean K. (commercial)',
+      },
+      {
+        nom: 'Faso Danfani Tissus', pays: '🇧🇫 Ouagadougou, Burkina Faso', categorie: 'Textile',
+        soumis: 'Il y a 2 j', recrutePar: 'Inscription directe',
+      },
+      {
+        nom: 'Awa Cosmétiques', pays: '🇸🇳 Dakar, Sénégal', categorie: 'Cosmétiques',
+        soumis: 'Il y a 3 j', recrutePar: 'Jean K. (commercial)',
+      },
+    ],
+    note:
+      'Un dossier s’ouvre ici avec ses pièces, sa checklist et le motif de rejet. '
+      + 'La décision (valider / rejeter) est enregistrée sous la journée du modérateur '
+      + 'et remonte au super-admin sous forme de chiffres agrégés.',
   },
 
   roadmap: { texte: 'Prochaine étape LOOHOO : Boutique en ligne', annee: '2027' },
