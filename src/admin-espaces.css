@@ -1,0 +1,500 @@
+/* ==========================================================================
+   LOOHOO Admin — écrans d'espace par rôle
+   Reprend les maquettes du client : n02 (fournisseurs), n03 (modérateur),
+   n04 (service client & litiges).
+   Toutes les classes sont préfixées `loo-esp-` pour ne rien casser dans
+   admin.css. Mobile d'abord : une seule colonne, tout reste lisible au doigt.
+   ========================================================================== */
+
+/* ---------- en-tête (hero) : bandeau marque + chiffres clés ---------- */
+.loo-esp-hero {
+  margin: 1rem 0 1.1rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border-radius: 18px;
+  background: var(--gradient-marque);
+  color: var(--loo-blanc);
+  box-shadow: var(--ombre-carte);
+}
+
+.loo-esp-hero h2 {
+  margin: 0 0 0.2rem;
+  font-family: var(--police-affiche);
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: var(--loo-blanc);
+}
+
+.loo-esp-hero-resume {
+  margin: 0 0 0.95rem;
+  font-size: 0.85rem;
+  opacity: 0.94;
+}
+
+.loo-esp-hero-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+  gap: 0.6rem;
+}
+
+.loo-esp-hero-stat {
+  padding: 0.6rem 0.7rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.17);
+}
+
+.loo-esp-hero-stat b {
+  display: block;
+  font-family: var(--police-etiquette);
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.loo-esp-hero-stat span {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.71rem;
+  line-height: 1.25;
+  opacity: 0.94;
+}
+
+/* ---------- titre de section (surtitre) ---------- */
+.loo-esp-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 1.25rem 0 0.6rem;
+  padding: 0.28em 0.9em;
+  border-radius: 999px;
+  background: var(--loo-papier-ombre);
+  color: var(--loo-encre);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---------- listes de lignes cliquables ---------- */
+.loo-esp-liste {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.loo-esp-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--loo-papier-ombre);
+  border-radius: 14px;
+  background: var(--loo-blanc);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.loo-esp-item:hover { border-color: var(--loo-orange); }
+
+.loo-esp-item-ic {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #FFF1DE;
+  font-size: 1.05rem;
+}
+
+.loo-esp-item-ic.alerte { background: #FDE5E1; }
+
+.loo-esp-item-txt { flex: 1; min-width: 0; }
+
+.loo-esp-item-n {
+  display: block;
+  font-family: var(--police-etiquette);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.loo-esp-item-l {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+
+.loo-esp-item-l.urgent {
+  color: var(--loo-rouge);
+  font-weight: 700;
+  opacity: 1;
+}
+
+.loo-esp-item-tag {
+  flex: none;
+  padding: 0.1em 0.65em;
+  border-radius: 999px;
+  background: var(--loo-papier-ombre);
+  font-family: var(--police-etiquette);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.loo-esp-chevron {
+  flex: none;
+  font-size: 1.15rem;
+  opacity: 0.4;
+}
+
+/* ---------- carte sombre « dossier en cours » ---------- */
+.loo-esp-sombre {
+  padding: 1.1rem;
+  border-radius: 18px;
+  background: var(--loo-encre);
+  color: var(--loo-papier);
+}
+
+.loo-esp-sombre-titre {
+  margin: 0 0 0.3rem;
+  font-size: 0.67rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.loo-esp-sombre-nom {
+  margin: 0 0 0.8rem;
+  font-family: var(--police-affiche);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--loo-blanc);
+}
+
+.loo-esp-tag {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  padding: 0.2em 0.75em;
+  border-radius: 999px;
+  background: #8A4100;
+  color: var(--loo-blanc);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.loo-esp-docs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 112px));
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.loo-esp-doc {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: #2E2A25;
+  font-size: 1.3rem;
+}
+
+.loo-esp-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.8rem;
+}
+
+.loo-esp-info:first-of-type { border-top: none; }
+.loo-esp-info span:first-child { opacity: 0.62; }
+.loo-esp-info span:last-child { text-align: right; }
+
+.loo-esp-lien {
+  display: inline-block;
+  margin: 0.3rem 0.9rem 0 0;
+  color: var(--loo-orange);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.loo-esp-checklist {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0.85rem;
+}
+
+.loo-esp-case {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.loo-esp-case i {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-style: normal;
+}
+
+.loo-esp-case i.fait {
+  border-color: #1D9E75;
+  background: #1D9E75;
+  color: var(--loo-blanc);
+}
+
+.loo-esp-champ {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: #2E2A25;
+  color: var(--loo-blanc);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.loo-esp-champ::placeholder { color: rgba(255, 255, 255, 0.42); }
+
+.loo-esp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.7rem;
+}
+
+.loo-esp-btn {
+  flex: 1 1 120px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--loo-blanc);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.loo-esp-btn-ok {
+  border-color: #1D9E75;
+  background: #1D9E75;
+}
+
+.loo-esp-btn-choix.actif {
+  border-color: var(--loo-orange);
+  background: var(--loo-orange);
+}
+
+.loo-esp-note {
+  margin: 0.6rem 0 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0.62;
+}
+
+/* ---------- carte « votre journée » ---------- */
+.loo-esp-journee {
+  margin: 1rem 0 0.2rem;
+  padding: 1rem;
+  border: 1px solid var(--loo-papier-ombre);
+  border-radius: 16px;
+  background: var(--loo-blanc);
+}
+
+.loo-esp-journee-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+
+.loo-esp-journee-tete b { font-size: 0.95rem; }
+.loo-esp-journee-tete span { font-size: 0.75rem; opacity: 0.6; }
+
+.loo-esp-journee-grille {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.loo-esp-journee-stat {
+  padding: 0.6rem 0.4rem;
+  border-radius: 10px;
+  background: var(--loo-papier);
+  text-align: center;
+}
+
+.loo-esp-journee-stat b {
+  display: block;
+  font-family: var(--police-etiquette);
+  font-size: 1.05rem;
+}
+
+.loo-esp-journee-stat span {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.67rem;
+  line-height: 1.25;
+  opacity: 0.72;
+}
+
+.loo-esp-btn-plein {
+  width: 100%;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 10px;
+  background: #1D9E75;
+  color: var(--loo-blanc);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loo-esp-sous {
+  margin: 0.55rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  opacity: 0.62;
+}
+
+/* ---------- bascule d'espace (litiges / call center) ---------- */
+.loo-esp-bascule {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0 0.2rem;
+}
+
+.loo-esp-bascule-btn {
+  flex: 1;
+  padding: 0.55rem;
+  border: 1px solid var(--loo-papier-ombre);
+  border-radius: 10px;
+  background: var(--loo-blanc);
+  color: var(--loo-encre);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loo-esp-bascule-btn.actif {
+  border-color: var(--loo-orange);
+  background: var(--loo-orange);
+  color: var(--loo-blanc);
+}
+
+/* ---------- litige : face à face + fil de conversation ---------- */
+.loo-esp-vs {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.8rem;
+}
+
+.loo-esp-vs-partie {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.7rem;
+  border-radius: 12px;
+  background: #2E2A25;
+}
+
+.loo-esp-vs-partie p {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  opacity: 0.66;
+}
+
+.loo-esp-vs-partie b {
+  display: block;
+  margin: 0.1rem 0;
+  font-size: 0.85rem;
+  color: var(--loo-blanc);
+}
+
+.loo-esp-vs-sep {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+.loo-esp-fil {
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  background: #2E2A25;
+}
+
+.loo-esp-fil p {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.loo-esp-fil p:last-child { margin-bottom: 0; }
+
+/* ---------- bandeau feuille de route ---------- */
+.loo-esp-route {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.25rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 14px;
+  background: var(--loo-encre);
+  color: var(--loo-papier);
+  font-size: 0.82rem;
+}
+
+.loo-esp-route-annee {
+  flex: none;
+  margin-left: auto;
+  padding: 0.15em 0.7em;
+  border-radius: 999px;
+  background: var(--loo-orange);
+  color: var(--loo-blanc);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* ---------- courbe à onglets ---------- */
+.loo-esp-courbe-tete {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0.7rem 0 0.5rem;
+}
+
+.loo-esp-courbe-valeur {
+  font-family: var(--police-etiquette);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.loo-esp-courbe-hausse {
+  color: #1D9E75;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.loo-esp-courbe svg {
+  display: block;
+  width: 100%;
+  height: 96px;
+}
