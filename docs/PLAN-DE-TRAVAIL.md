@@ -35,6 +35,18 @@ npm run build      # vérif avant commit (doit passer)
   boutiques, et colonne latérale (litiges, alertes stock, parrainages, journal des
   décisions, équipe, connexions, feuille de route).
 - **Page Boutiques** (`src/pages/Boutiques.jsx`).
+- **Écrans des rôles (maquettes n02/n03/n04) — construits le 09/10/2026** :
+  - `src/pages/EspaceFournisseurs.jsx` → route `/fournisseurs` (hero 4 chiffres,
+    courbe à onglets via `CourbeOnglets`, « À traiter », « Aperçu rapide »).
+  - `src/pages/EspaceModerateur.jsx` → route `/moderateur` (Votre journée, dossier
+    en cours avec documents/infos/checklist/motif, valider/rejeter, file d'attente,
+    fournisseurs publiés, commerciaux).
+  - `src/pages/ServiceClientLitiges.jsx` → route `/service-client` (bascule
+    ⚖️ Litiges / 📞 Call center, dossier de litige, file des litiges, alertes stock).
+  - Navigation : `src/components/NavAdmin.jsx` (Général / Fournisseurs / Modérateur /
+    Service client / Boutiques 🔒 — verrou visuel seulement pour l'instant).
+  - Valeurs des écrans isolées dans `src/api/donnees-espaces.js` (mêmes règles que
+    `donnees-fictives.js`) ; styles dans `src/admin-espaces.css`.
 - Blocs **sans source de données** clairement marqués « fictif » à l'écran, valeurs
   isolées dans un seul fichier : `src/api/donnees-fictives.js` (aucune lecture en base).
 - Le bandeau en haut de page rappelle que ces blocs ne sont branchés sur rien.
@@ -43,25 +55,25 @@ npm run build      # vérif avant commit (doit passer)
 
 1. **Corriger le modèle de facturation** partout où un champ parle de « commission » :
    c'est un **abonnement** → « Revenu LOOHOO (abonnements actifs) ». *(cf. spec — point urgent)*
-2. **Construire les 3 écrans qui manquent**, à partir des maquettes fournies :
-   - `n02` — le **module Fournisseurs** vu par l'admin (aujourd'hui : file d'action
-     intégrée à « Général » ; à sortir dans son propre écran, avec sa propre courbe
-     « Fournisseurs publiés / Produits / Acheteurs / Demandes 7 j » et son bloc « À traiter »).
-   - `n03` — l'**espace modérateur** (Anno) : « Votre journée », dossier en cours
-     (checklist + motif obligatoire + rejeter/valider), file d'attente, fournisseurs publiés.
-   - `n04` — **Service client & litiges** (Marie) : sélecteur « ⚖️ Litiges / 📞 Call center »,
-     dossier de litige, file des litiges, alertes stock.
+2. ~~Construire les 3 écrans qui manquent (n02, n03, n04)~~ → **fait** (routes
+   `/fournisseurs`, `/moderateur`, `/service-client`). Reste à faire relire par le client.
 3. **Écran Commercial terrain** : décrit dans la spec mais **aucune maquette fournie** →
    à dessiner puis à construire (objectif hebdo, taux de validation, primes, « Ajouter un
    fournisseur » en brouillon).
 4. **Rôles et permissions** : navigation qui change selon le rôle (super-admin, modérateur,
    service client & litiges, commercial terrain), avec champ **zone/pays** dès le départ.
+   Aujourd'hui la barre montre les 5 entrées : chaque écran de rôle porte déjà sa
+   persona de démo (Anno, Marie C.).
 5. **Brancher les blocs « fictifs »** au fur et à mesure que les tables existent
    (message, avis, favori, demande, litige, vue_profil, recherche_sans_resultat,
    session_connexion…). Tant qu'une table n'existe pas : le bloc reste marqué « fictif ».
 6. **Écran « Demandes non couvertes »** (recherches sans résultat) — priorité haute
    dans la spec.
 7. **Sécurité admin** : 2FA, déconnexion automatique, journal d'audit des actions.
+8. **Ouvrir les écrans intermédiaires** annoncés par les maquettes (détail fournisseur,
+   file d'attente complète avec recherche, conversation complète d'un litige, « À traiter »,
+   Produits, Acheteurs, Conversations, Affaires & abonnements, Leads, Catégories,
+   Journal d'audit, Équipe & rôles). Aujourd'hui les lignes cliquables n'ouvrent rien.
 
 ## Règles à respecter (rappel)
 
