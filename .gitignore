@@ -5,3 +5,4 @@ dist
 
 # Demonstration locale (jamais commitee) - voir vite.config.js
 src/api/admin-demo.js
+docs/veille/
