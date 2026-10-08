@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOOHOO — Espace modérateur Anno (maquette)</title>
+<style>
+  :root {
+    --orange: #FF6600; --orange2: #D84315; --orange-light: #FFF1E6;
+    --green: #1D9E75; --green-light: #E1F5EE;
+    --red: #D85A30; --amber: #8A4100;
+    --text-primary: #1A1A1A; --text-secondary: #6B6B66; --text-muted: #9B9B94;
+    --border: #E7E5DD; --surface: #FFFFFF; --surface-1: #F7F6F1;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #EDEBE3; margin: 0; padding: 24px 0; display: flex; justify-content: center; }
+  .phone { width: 390px; background: var(--surface-1); border-radius: 24px; padding: 0 0 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); overflow: hidden; }
+  .label-tag { text-align: center; font-size: 12px; color: var(--text-muted); margin: 12px 0; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #fff; border-bottom: 1px solid var(--border); }
+  .topbar .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 6px; }
+  .topbar .logo span { background: var(--orange); color: #fff; font-size: 10px; padding: 2px 5px; border-radius: 4px; }
+  .avatar-sm { width: 30px; height: 30px; border-radius: 50%; background: var(--orange); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; position: relative; }
+  .avatar-sm .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); border: 2px solid #fff; position: absolute; bottom: -1px; right: -1px; }
+
+  .content { padding: 0 16px; margin-top: 14px; }
+
+  .hero { background: linear-gradient(135deg, var(--orange), var(--orange2)); border-radius: 16px; padding: 20px; color: #fff; margin-bottom: 16px; }
+  .hero h2 { font-size: 19px; margin: 0 0 4px; }
+  .hero p { font-size: 12px; margin: 0 0 14px; opacity: 0.9; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .hero-stat { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 8px; text-align: center; }
+  .hero-stat .n { font-size: 18px; font-weight: 700; margin: 0; }
+  .hero-stat .l { font-size: 10px; margin: 2px 0 0; opacity: 0.9; line-height: 1.2; }
+
+  .section-title { font-size: 12px; color: var(--orange); margin: 0 0 10px; font-weight: 700; background: var(--orange-light); display: inline-block; padding: 4px 10px; border-radius: 6px; }
+
+  .list-row { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; }
+  .list-row .ic { width: 36px; height: 36px; border-radius: 9px; background: var(--orange-light); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .list-row .ic.warn { background: #FBE9E4; }
+  .list-row .n { font-size: 15px; font-weight: 600; margin: 0; color: var(--text-primary); }
+  .list-row .l { font-size: 11px; color: var(--text-secondary); margin: 2px 0 0; }
+  .list-row .l.urgent { color: var(--red); font-weight: 600; }
+  .list-row .chevron { margin-left: auto; color: var(--text-muted); }
+
+  .detail-card { background: #1A1A1A; border-radius: 16px; padding: 18px; margin-bottom: 16px; color: #fff; }
+  .detail-card .dtitle { font-size: 11px; color: #C9C7BE; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .detail-card .dname { font-size: 16px; font-weight: 700; margin: 0 0 12px; }
+  .resubmit-tag { background: var(--amber); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 500; display: inline-block; margin-bottom: 8px; }
+  .doc-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 12px; }
+  .doc-thumb { aspect-ratio: 1; background: #2E2E2E; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid #333; font-size: 12px; }
+  .info-row:first-of-type { border-top: none; }
+  .info-label { color: #9B9B94; }
+  .info-value { color: #fff; }
+  .contact-link { font-size: 12px; color: var(--orange); text-decoration: none; display: inline-block; margin-top: 4px; }
+  .checklist { margin-bottom: 12px; }
+  .check-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px; color: #fff; }
+  .check-box { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #555; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+  .check-box.done { background: var(--green); border: none; }
+  .reason-input { width: 100%; background: #2E2E2E; border: 1px solid #444; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #fff; margin-bottom: 10px; }
+  .action-row { display: flex; gap: 10px; margin-top: 4px; }
+  .btn-reject-full { flex: 1; padding: 10px; background: transparent; border: 1px solid #555; color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; }
+  .btn-approve-full { flex: 1; padding: 10px; background: var(--green); border: none; color: #fff; border-radius: 8px; font-size: 13px; font-weight: 500; }
+
+  .nav-hint { background: #fff; border: 1px dashed var(--border); border-radius: 12px; padding: 12px 14px; font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px; }
+
+  .roadmap-teaser { background: #1A1A1A; border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+  .roadmap-teaser p { font-size: 12px; color: #fff; margin: 0; }
+  .roadmap-teaser span.year { background: var(--orange); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; margin-left: auto; flex-shrink: 0; }
+
+  .day-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+  .day-row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .day-title { font-size: 14px; font-weight: 700; margin: 0; color: var(--text-primary); }
+  .day-sub { font-size: 11px; color: var(--text-muted); margin: 2px 0 0; }
+  .day-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .day-stat { background: var(--surface-1); border-radius: 10px; padding: 10px 6px; text-align: center; }
+  .day-stat .n { font-size: 17px; font-weight: 700; margin: 0; color: var(--text-primary); }
+  .day-stat .l { font-size: 10px; color: var(--text-secondary); margin: 2px 0 0; line-height: 1.2; }
+  .day-validated-tag { background: var(--green-light); color: var(--green); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-validate-day { width: 100%; padding: 10px; background: var(--green); border: none; color: #fff; border-radius: 8px; font-size: 13px; font-weight: 600; }
+  .sub-note { font-size: 11px; margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="topbar">
+    <div class="logo">LOOHOO <span>MODÉRATEUR</span></div>
+    <div class="avatar-sm">AN<span class="dot"></span></div>
+  </div>
+  <p class="label-tag">Écran : Tableau de bord — Anno</p>
+
+  <div class="content">
+
+    <div class="hero">
+      <h2>Bonjour Anno</h2>
+      <p>Connecté depuis 09:12 · 6 dossiers en attente</p>
+      <div class="hero-grid">
+        <div class="hero-stat"><p class="n">14</p><p class="l">Validés (semaine)</p></div>
+        <div class="hero-stat"><p class="n">3</p><p class="l">Rejetés (semaine)</p></div>
+        <div class="hero-stat"><p class="n">2h10</p><p class="l">Délai moyen</p></div>
+      </div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-row-between">
+        <div>
+          <p class="day-title">Votre journée</p>
+          <p class="day-sub">Mercredi 7 octobre</p>
+        </div>
+      </div>
+      <div class="day-grid">
+        <div class="day-stat"><p class="n">10</p><p class="l">Dossiers traités aujourd'hui</p></div>
+        <div class="day-stat"><p class="n">8</p><p class="l">Traités hier</p></div>
+        <div class="day-stat"><p class="n">52</p><p class="l">Cette semaine</p></div>
+      </div>
+      <button class="btn-validate-day">✓ Valider ma journée</button>
+      <p class="sub-note" style="margin-top:8px;color:var(--text-muted);">Une fois validée, votre journée remonte automatiquement chez le super-admin comme rapport de travail — plus besoin de le rédiger à part.</p>
+    </div>
+
+    <p class="section-title">Dossier en cours</p>
+    <div class="detail-card">
+      <p class="dtitle">Dossier ouvert</p>
+      <span class="resubmit-tag">↻ Resoumis — rejeté le 2 oct.</span>
+      <p class="dname">Bazin Mania</p>
+      <div class="doc-grid">
+        <div class="doc-thumb">🪪</div>
+        <div class="doc-thumb">📦</div>
+        <div class="doc-thumb">🏬</div>
+      </div>
+      <div class="info-row"><span class="info-label">Pays</span><span class="info-value">🇲🇱 Bamako, Mali</span></div>
+      <div class="info-row"><span class="info-label">Catégorie</span><span class="info-value">Textile</span></div>
+      <div class="info-row"><span class="info-label">Stock déclaré</span><span class="info-value">Disponible</span></div>
+      <div class="info-row"><span class="info-label">Recruté par</span><span class="info-value">Jean K. (commercial)</span></div>
+      <div class="info-row"><span class="info-label">Soumis</span><span class="info-value">Il y a 4h</span></div>
+      <a href="#" class="contact-link">✉ Contacter le commercial</a>
+
+      <p class="dtitle" style="margin-top:14px;">Checklist de vérification</p>
+      <div class="checklist">
+        <div class="check-item"><span class="check-box done">✓</span>Document d'identité lisible</div>
+        <div class="check-item"><span class="check-box done">✓</span>Photo du stock cohérente</div>
+        <div class="check-item"><span class="check-box">—</span>Local cohérent avec la ville déclarée</div>
+      </div>
+
+      <p class="dtitle">Motif (si rejet)</p>
+      <input class="reason-input" placeholder="Ex. photo du stock peu claire" />
+
+      <div class="action-row">
+        <button class="btn-reject-full">Rejeter</button>
+        <button class="btn-approve-full">✓ Valider</button>
+      </div>
+    </div>
+
+    <p class="section-title">File d'attente</p>
+    <div class="list-row">
+      <div class="ic warn">🏭</div>
+      <div style="flex:1;"><p class="n">6</p><p class="l">Fournisseurs à vérifier</p></div>
+      <div class="chevron">›</div>
+    </div>
+    <div class="list-row">
+      <div class="ic warn">⏱️</div>
+      <div style="flex:1;"><p class="n">1</p><p class="l urgent">⚠ en attente depuis 48h</p></div>
+      <div class="chevron">›</div>
+    </div>
+
+    <p class="section-title">Fournisseurs publiés</p>
+    <div class="list-row">
+      <div class="ic">🏭</div>
+      <div style="flex:1;"><p class="n">340</p><p class="l">Fournisseurs actifs — rechercher pour suspendre si besoin</p></div>
+      <div class="chevron">›</div>
+    </div>
+
+    <p class="section-title">Vos commerciaux</p>
+    <div class="list-row">
+      <div class="ic">👥</div>
+      <div style="flex:1;"><p class="n">2</p><p class="l">Commerciaux terrain actifs</p></div>
+      <div class="chevron">›</div>
+    </div>
+
+    <p class="nav-hint">Chaque ligne ci-dessus s'ouvre dans son propre écran : File d'attente complète (recherche), Détail fournisseur, et Gestion des commerciaux (ajouter/retirer — limité au rôle commercial).</p>
+
+    <div class="roadmap-teaser">
+      <span style="font-size:16px;">🚀</span>
+      <p>Prochaine étape LOOHOO : Boutique en ligne</p>
+      <span class="year">2027</span>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
