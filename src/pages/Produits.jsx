@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import NavAdmin from '../components/NavAdmin.jsx';
 import EnTeteAdmin from '../components/EnTeteAdmin.jsx';
 import BandeauFictif from '../components/BandeauFictif.jsx';
-import { chargerProduits, verifierStockProduit, resumeSources, ilYA } from '../api/loohoo.js';
+import { chargerProduits, verifierStockProduit, deciderProduit, resumeSources, ilYA } from '../api/loohoo.js';
 
 /*
   ÉCRAN « PRODUITS » — onglet du module Fournisseurs (maquette n02).
@@ -43,6 +43,7 @@ export default function Produits() {
   const [reel, setReel] = useState(null);
   const [souci, setSouci] = useState('');
   const [message, setMessage] = useState('');
+  const [motif, setMotif] = useState({});
 
   const charger = () => {
     setReel(null);
@@ -95,6 +96,24 @@ export default function Produits() {
       charger();
     } catch (e) {
       setMessage(`Vérification refusée : ${String(e?.message || e)}. Cette action demande un compte administrateur connecté.`);
+    }
+  }
+
+  async function trancher(produit, statut) {
+    setMessage('');
+    const m = (motif[produit.id] || '').trim();
+    if (statut === 'rejete' && !m) {
+      setMessage('Un motif est obligatoire pour rejeter un produit.');
+      return;
+    }
+    try {
+      const voie = await deciderProduit(produit.id, statut, statut === 'rejete' ? m : null);
+      setMessage(statut === 'publie'
+        ? `« ${produit.nom} » publié (${voie}).`
+        : `« ${produit.nom} » rejeté (${voie}).`);
+      charger();
+    } catch (e) {
+      setMessage(`Décision refusée : ${String(e?.message || e)}. Cette action demande un compte administrateur connecté.`);
     }
   }
 
@@ -194,6 +213,23 @@ export default function Produits() {
                 <button type="button" className="loo-esp-bascule-btn" onClick={() => verifier(p)}>
                   Vérifier le stock
                 </button>
+              )}
+              {p.statut === 'en_attente' && (
+                <>
+                  <input
+                    className="loo-esp-champ"
+                    type="text"
+                    value={motif[p.id] || ''}
+                    onChange={(e) => setMotif((m) => ({ ...m, [p.id]: e.target.value }))}
+                    placeholder="Motif (obligatoire pour rejeter)"
+                  />
+                  <button type="button" className="loo-esp-bascule-btn" onClick={() => trancher(p, 'publie')}>
+                    Publier
+                  </button>
+                  <button type="button" className="loo-esp-bascule-btn" onClick={() => trancher(p, 'rejete')}>
+                    Rejeter
+                  </button>
+                </>
               )}
             </div>
           ))}

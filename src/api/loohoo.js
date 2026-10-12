@@ -690,6 +690,39 @@ export async function verifierStockProduit(id, verifie = true) {
   return rpc('verifier_stock_produit', { p_id: id, p_verifie: verifie });
 }
 
+/*
+  Décision de l'équipe sur un produit en attente : publier ou rejeter.
+
+  Deux chemins, dans cet ordre :
+   1. moderer_produit(p_id, p_statut, p_motif) — c'est la fonction que l'écran de
+      validation appelle déjà (src/api/admin.js). Elle n'apparaît PAS dans les
+      migrations du dépôt : si la base ne la connaît pas, elle répond « function
+      does not exist » et on passe au chemin 2.
+   2. Mise à jour directe de `produit`, explicitement autorisée aux admins par le
+      déclencheur produit_proteger_moderation : « Les admins (y compris via la
+      fonction moderer_produit) gardent la main » (migration 0001). Le changement
+      de statut est alors inscrit dans le journal d'audit par le déclencheur
+      journal_produit (migration 0011).
+
+  Sans session admin, les deux chemins sont refusés (42501) : l'écran affiche le
+  refus, il ne prétend pas avoir publié.
+*/
+export async function deciderProduit(id, statut, motif = null) {
+  try {
+    await rpc('moderer_produit', { p_id: id, p_statut: statut, p_motif: motif });
+    return 'moderer_produit';
+  } catch (e) {
+    const inconnue = /does not exist|schema cache|PGRST202|not find the function/i.test(String(e?.message || e));
+    if (!inconnue) throw e;
+  }
+  const { error } = await supabase
+    .from('produit')
+    .update({ statut, motif_rejet: statut === 'rejete' ? motif : null })
+    .eq('id', id);
+  if (error) throw error;
+  return 'mise a jour directe';
+}
+
 /* ------------------------------------------ 8. écran « Acheteurs » */
 
 /*

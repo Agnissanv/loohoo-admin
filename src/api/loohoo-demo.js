@@ -267,6 +267,11 @@ export async function verifierStockProduit() {
   return null; // en démonstration, rien n'est écrit
 }
 
+export async function deciderProduit() {
+  // En démonstration, rien n'est écrit dans la base : on confirme simplement l'appel.
+  return 'démonstration (aucune écriture)';
+}
+
 export async function chargerAcheteurs() {
   return {
     acheteurs: [
