@@ -45,13 +45,16 @@ function reponseLocaleApi() {
   administrateur : la base elle-même refuse la liste des fournisseurs (contacts,
   fiches non publiées) à tout autre compte. Pour pouvoir travailler l'affichage
   sans compte admin et sans risquer de modifier les vraies données, ce greffon
-  remplace src/api/admin.js par src/api/admin-demo.js (six fournisseurs de
-  démonstration qui couvrent tous les cas d'affichage).
+  remplace :
+    - src/api/admin.js  par src/api/admin-demo.js  (six fournisseurs de démo) ;
+    - src/api/loohoo.js par src/api/loohoo-demo.js (lectures réelles : tableau de
+      bord, file de validation, modérateur, service client).
+  Les deux jeux de démonstration couvrent tous les cas d'affichage.
 
   Il agit UNIQUEMENT sur le serveur de développement (apply: 'serve'), et
   seulement si VITE_DEMO_ADMIN=1 dans .env.local. La version compilée
   (npm run build) et le site en ligne ne sont pas concernés : ni ce greffon, ni
-  le fichier de démonstration n'y sont utilisés. Le code de l'application n'est
+  les fichiers de démonstration n'y sont utilisés. Le code de l'application n'est
   pas modifié.
 
   Pour désactiver la démonstration : VITE_DEMO_ADMIN=0 dans .env.local, puis
@@ -59,6 +62,7 @@ function reponseLocaleApi() {
 */
 function demoLocale(actif) {
   const fichierDemo = path.resolve(RACINE, 'src/api/admin-demo.js');
+  const fichierDemoLoohoo = path.resolve(RACINE, 'src/api/loohoo-demo.js');
   return {
     name: 'demo-locale',
     apply: 'serve',
@@ -68,6 +72,10 @@ function demoLocale(actif) {
     resolveId(source) {
       if (!actif) return null;
       if (source === './admin.js' || source.endsWith('/api/admin.js')) return fichierDemo;
+      // La couche de lectures réelles (loohoo.js) a son propre jeu de
+      // démonstration : en local sans compte admin, la base refuserait de
+      // toute façon la lecture des tables protégées.
+      if (source === './loohoo.js' || source.endsWith('/api/loohoo.js')) return fichierDemoLoohoo;
       return null;
     },
   };
@@ -80,8 +88,8 @@ export default defineConfig(({ command, mode }) => {
   if (command === 'serve') {
     console.log(
       demoActive
-        ? '  ⚠  DÉMONSTRATION LOCALE ACTIVE — la section Fournisseurs utilise des données de démonstration.'
-        : '  ℹ  Démonstration locale inactive (données réelles de la base).'
+        ? '  ⚠  DÉMONSTRATION LOCALE ACTIVE — admin ET lectures base utilisent les fichiers de démonstration.'
+        : '  ℹ  Démonstration locale inactive (lectures réelles de la base LOOHOO).'
     );
   }
 

@@ -7,6 +7,7 @@ import {
   changerStatut, recupererFournisseurs, recupererStats, recupererStatsBoutiques,
 } from '../api/admin.js';
 import { DONNEES_FICTIVES, TEXTE_RAPPEL } from '../api/donnees-fictives.js';
+import { chargerGeneral, chargerRecherchesVides, resumeSources } from '../api/loohoo.js';
 import { useSessionAdmin } from '../hooks/useSessionAdmin.js';
 import CarteFournisseurAdmin from '../components/CarteFournisseurAdmin.jsx';
 import NavAdmin from '../components/NavAdmin.jsx';
@@ -19,8 +20,6 @@ const ONGLETS = [
 
 const METRIQUES = ['Revenu', 'GMV', 'Fournisseurs', 'Acheteurs'];
 const PERIODES = ['7 derniers jours', '30 derniers jours', '12 derniers mois'];
-
-const D = DONNEES_FICTIVES;
 
 function initiales(nom) {
   return (nom || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0].toUpperCase()).join('');
@@ -51,10 +50,18 @@ export default function TableauDeBord() {
   const [deplie, setDeplie] = useState(null);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState('');
+  const [reel, setReel] = useState(null);
+  const [vides, setVides] = useState(null);
+
+  // Blocs branchés sur la base LOOHOO (voir src/api/loohoo.js) : ils écrasent
+  // les valeurs de repli au fur et à mesure de la lecture.
+  const D = { ...DONNEES_FICTIVES, ...(reel || {}) };
 
   const recharger = useCallback(() => {
     recupererFournisseurs().then(setFournisseurs).catch((err) => setErreur(err.message));
     recupererStats().then(setStats).catch(() => {});
+    chargerGeneral().then(setReel).catch(() => {});
+    chargerRecherchesVides(30).then((r) => setVides(r.recherches)).catch(() => setVides([]));
   }, []);
 
   useEffect(() => {
@@ -121,7 +128,7 @@ export default function TableauDeBord() {
   }
 
   const tousCoches = liste.length > 0 && liste.every((f) => selection.includes(f.id));
-  const serie = D.ca.series[metrique];
+  const serie = (D.ca && D.ca.series[metrique]) || [0];
 
   return (
     <div className="loo-admin">
@@ -140,10 +147,11 @@ export default function TableauDeBord() {
         </header>
 
         <div className="loo-admin-bandeau">
-          <span className="loo-admin-bandeau-pastille">{TEXTE_RAPPEL}</span>
+          <span className="loo-admin-bandeau-pastille">{reel ? 'base LOOHOO' : TEXTE_RAPPEL}</span>
           <span className="loo-admin-bandeau-texte">
-            Données de démonstration — <strong>aucune source réelle</strong> pour les blocs marqués{' '}
-            <em>fictif</em> : rien n'est branché dessus, aucune donnée n'est lue en base pour eux.
+            {reel
+              ? resumeSources(reel.sources)
+              : 'Lecture de la base en cours — les blocs branchés se remplissent dès que la lecture répond.'}
           </span>
         </div>
 
@@ -202,11 +210,11 @@ export default function TableauDeBord() {
               </div>
             </section>
 
-            {/* ---- Chiffre d'affaires : données fictives ---- */}
+            {/* ---- Chiffre d'affaires : base réelle (abonnements + affaires) ---- */}
             <section className="loo-admin-section">
               <div className="loo-admin-section-tete">
                 <h2 className="loo-admin-etiquette">Chiffre d'affaires LOOHOO</h2>
-                <span className="loo-admin-source">fictif</span>
+                <span className="loo-admin-source loo-admin-source-reelle">base réelle</span>
               </div>
               <article className="loo-admin-carte">
                 <div className="loo-admin-ca-tete">
@@ -228,26 +236,29 @@ export default function TableauDeBord() {
                 </div>
                 <div className="loo-admin-ca-valeur">
                   <strong>
-                    {metrique === 'Revenu'
-                      ? `${D.ca.ceMois.toLocaleString('fr-FR')} F CFA`
-                      : `${serie[serie.length - 1].toLocaleString('fr-FR')} ${D.ca.unites[metrique]}`.trim()}
+                    {D.ca
+                      ? (metrique === 'Revenu'
+                        ? `${D.ca.ceMois.toLocaleString('fr-FR')} F CFA`
+                        : `${serie[serie.length - 1].toLocaleString('fr-FR')} ${D.ca.unites[metrique]}`.trim())
+                      : '…'}
                   </strong>
-                  <span className="loo-admin-hausse">{D.ca.variation}</span>
+                  <span className="loo-admin-hausse">{D.ca ? D.ca.variation : ''}</span>
                   <span className="loo-admin-ca-periode">{periode}</span>
                 </div>
                 <Courbe points={serie} />
                 <p className="loo-admin-note">
-                  GMV facilité {D.ca.gmvFacilite.toLocaleString('fr-FR')} F CFA · {D.ca.partCaptee} capté.
-                  Valeurs inventées : aucun calcul n'est fait sur la base.
+                  {D.ca
+                    ? `Revenu = abonnements actifs (${D.ca.detailRevenu}) · GMV facilité ${D.ca.gmvFacilite.toLocaleString('fr-FR')} F CFA · ${D.ca.partCaptee} capté. GMV = affaires confirmées (affaire.volume_fcfa).`
+                    : 'Lecture des abonnements et des affaires en cours…'}
                 </p>
               </article>
             </section>
 
-            {/* ---- Santé du réseau : données fictives ---- */}
+            {/* ---- Santé du réseau : calculée sur la base ---- */}
             <section className="loo-admin-section">
               <div className="loo-admin-section-tete">
                 <h2 className="loo-admin-etiquette">Santé du réseau</h2>
-                <span className="loo-admin-source">fictif</span>
+                <span className="loo-admin-source loo-admin-source-reelle">base réelle</span>
               </div>
               <div className="loo-admin-minis">
                 {D.santeReseau.map((s) => (
@@ -259,7 +270,7 @@ export default function TableauDeBord() {
               </div>
             </section>
 
-            {/* ---- Surveillance : mixte ---- */}
+            {/* ---- Surveillance : base réelle ---- */}
             <section className="loo-admin-section">
               <div className="loo-admin-section-tete">
                 <h2 className="loo-admin-etiquette">Surveillance</h2>
@@ -269,7 +280,7 @@ export default function TableauDeBord() {
                 {D.surveillanceInventee.map((s) => (
                   <div key={s.libelle} className="loo-admin-mini">
                     <strong>{s.valeur}</strong>
-                    <span>{s.libelle} <em className="loo-admin-tag-fictif">fictif</em></span>
+                    <span>{s.libelle}</span>
                   </div>
                 ))}
                 <div className="loo-admin-mini">
@@ -279,6 +290,10 @@ export default function TableauDeBord() {
                 <div className="loo-admin-mini">
                   <strong>{stats ? stats.produits_en_attente : '…'}</strong>
                   <span>Produits à vérifier</span>
+                </div>
+                <div className="loo-admin-mini">
+                  <strong>{vides ? vides.length : '…'}</strong>
+                  <span>Recherches sans résultat (30 j)</span>
                 </div>
               </div>
             </section>
@@ -445,33 +460,37 @@ export default function TableauDeBord() {
             </section>
           </div>
 
-          {/* ---------------- Colonne latérale (blocs fictifs) ---------------- */}
+          {/* ---------------- Colonne latérale ---------------- */}
           <aside className="loo-admin-cote">
             <article className="loo-admin-carte">
-              <h3 className="loo-admin-carte-titre">Litiges <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Litiges <span className="loo-admin-source loo-admin-source-reelle">base réelle</span></h3>
               <div className="loo-admin-minis loo-admin-minis-3">
-                <div className="loo-admin-mini"><strong>{D.litiges.enAttente}</strong><span>En attente</span></div>
-                <div className="loo-admin-mini"><strong>{D.litiges.enCours}</strong><span>En cours</span></div>
-                <div className="loo-admin-mini"><strong>{D.litiges.resolus}</strong><span>Résolus (7 j)</span></div>
+                <div className="loo-admin-mini"><strong>{D.litiges.enAttente}</strong><span>Affaires à confirmer</span></div>
+                <div className="loo-admin-mini"><strong>{D.litiges.enCours}</strong><span>Affaires contestées</span></div>
+                <div className="loo-admin-mini"><strong>{D.litiges.resolus}</strong><span>Affaires confirmées</span></div>
               </div>
               <p className="loo-admin-note">
-                Par type : {D.litiges.parType.map((t) => `${t.libelle} ${t.valeur}`).join(' · ')}
+                {D.litiges.parType && D.litiges.parType.length
+                  ? `Par type : ${D.litiges.parType.map((t) => `${t.libelle} ${t.valeur}`).join(' · ')}`
+                  : 'Le type de litige n’existe pas en base : pas connecté. Montant en jeu '}
+                {Number(D.litiges.volume || 0).toLocaleString('fr-FR')} F CFA
+                {D.litiges.commission ? ` · commission à facturer ${Number(D.litiges.commission).toLocaleString('fr-FR')} F CFA` : ''}.
               </p>
               <Link className="loo-admin-lien" to="/service-client">Ouvrir le service client &amp; litiges ›</Link>
             </article>
 
             <article className="loo-admin-carte">
-              <h3 className="loo-admin-carte-titre">Alertes stock <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Alertes stock <span className="loo-admin-source loo-admin-source-reelle">base réelle</span></h3>
               <div className="loo-admin-minis loo-admin-minis-3">
-                <div className="loo-admin-mini"><strong>{D.alertesStock.actives}</strong><span>Actives</span></div>
-                <div className="loo-admin-mini"><strong>{D.alertesStock.enVerification}</strong><span>En vérification</span></div>
-                <div className="loo-admin-mini"><strong>{D.alertesStock.resolues}</strong><span>Résolues (7 j)</span></div>
+                <div className="loo-admin-mini"><strong>{D.alertesStock.actives}</strong><span>Stock non vérifié</span></div>
+                <div className="loo-admin-mini"><strong>{D.alertesStock.enVerification}</strong><span>Produits en attente</span></div>
+                <div className="loo-admin-mini"><strong>{D.alertesStock.resolues}</strong><span>Stock vérifié</span></div>
               </div>
               <Link className="loo-admin-lien" to="/service-client">Voir les alertes stock ›</Link>
             </article>
 
             <article className="loo-admin-carte">
-              <h3 className="loo-admin-carte-titre">Parrainages <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Parrainages <span className="loo-admin-source">pas connecté</span></h3>
               <div className="loo-admin-parrainage">
                 <span className="loo-admin-sous-titre">Côté acheteurs</span>
                 <div className="loo-admin-minis loo-admin-minis-3">
@@ -488,13 +507,19 @@ export default function TableauDeBord() {
                   <div className="loo-admin-mini"><strong>{D.parrainages.fournisseurs.filleuls}</strong><span>Filleuls</span></div>
                 </div>
               </div>
+              <p className="loo-admin-note">
+                Pas connecté : le code source ne contient aucune table de parrainage
+                (ni côté fournisseurs, ni côté acheteurs).
+              </p>
             </article>
 
             <article className="loo-admin-carte">
-              <h3 className="loo-admin-carte-titre">Journal des décisions <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Journal des décisions <span className="loo-admin-source loo-admin-source-reelle">base réelle</span></h3>
               <ul className="loo-admin-journal">
-                {D.journal.map((j) => (
-                  <li key={j.action}>
+                {D.journal.length === 0 ? (
+                  <li><span>Aucune décision enregistrée pour l’instant.</span></li>
+                ) : D.journal.map((j) => (
+                  <li key={`${j.qui}-${j.action}-${j.quand}`}>
                     <span className="loo-admin-avatar loo-admin-avatar-petit">{j.qui}</span>
                     <span>{j.action}</span>
                     <em>{j.quand}</em>
@@ -504,9 +529,11 @@ export default function TableauDeBord() {
             </article>
 
             <article className="loo-admin-carte">
-              <h3 className="loo-admin-carte-titre">Votre équipe &amp; rôles <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Votre équipe &amp; rôles <span className="loo-admin-source loo-admin-source-reelle">base réelle</span></h3>
               <ul className="loo-admin-equipe">
-                {D.equipe.map((m) => (
+                {D.equipe.length === 0 ? (
+                  <li><span>Aucun administrateur enregistré.</span></li>
+                ) : D.equipe.map((m) => (
                   <li key={m.nom}>
                     <span className="loo-admin-avatar loo-admin-avatar-petit">{m.initiales}</span>
                     <span>{m.nom}</span>
@@ -515,10 +542,14 @@ export default function TableauDeBord() {
                 ))}
               </ul>
               <button type="button" className="btn btn-outline loo-admin-btn" disabled>Ajouter un membre</button>
+              <p className="loo-admin-note">
+                Lecture : fonction serveur admin_liste_admins(). L’ajout d’un membre
+                n’est pas encore branché.
+              </p>
             </article>
 
             <article className="loo-admin-carte">
-              <h3 className="loo-admin-carte-titre">Historique de connexion <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Historique de connexion <span className="loo-admin-source">pas connecté</span></h3>
               <ul className="loo-admin-equipe">
                 {D.connexions.map((c) => (
                   <li key={`${c.qui}-${c.plage}`}>
@@ -528,10 +559,13 @@ export default function TableauDeBord() {
                   </li>
                 ))}
               </ul>
+              <p className="loo-admin-note">
+                Pas connecté : aucune table d’historique de connexion dans le code source.
+              </p>
             </article>
 
             <article className="loo-admin-carte loo-admin-carte-route">
-              <h3 className="loo-admin-carte-titre">Feuille de route LOOHOO <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Feuille de route LOOHOO <span className="loo-admin-source">contenu</span></h3>
               <ul className="loo-admin-route">
                 {D.feuilleDeRoute.map((e) => (
                   <li key={e.libelle}>
@@ -543,7 +577,7 @@ export default function TableauDeBord() {
             </article>
 
             <article className="loo-admin-carte loo-admin-carte-route">
-              <h3 className="loo-admin-carte-titre">Aperçu — espace modérateur <span className="loo-admin-source">fictif</span></h3>
+              <h3 className="loo-admin-carte-titre">Aperçu — espace modérateur <span className="loo-admin-source">contenu</span></h3>
               <p className="loo-admin-apercu-titre">{D.apercu.titre}</p>
               <p className="loo-admin-note">{D.apercu.texte}</p>
               <Link className="loo-admin-lien" to="/moderateur">Ouvrir l’espace modérateur ›</Link>
@@ -573,8 +607,11 @@ function Kpi({ libelle, valeur, accent, to }) {
   return <div className={classe}>{contenu}</div>;
 }
 
-// Courbe du chiffre d'affaires : dessin d'après les valeurs reçues, aucune donnée lue.
+// Courbe du chiffre d'affaires : dessin d'après les valeurs reçues.
 function Courbe({ points }) {
+  if (!points || points.length < 2) {
+    return <p className="loo-admin-note">Pas assez de points pour tracer la courbe.</p>;
+  }
   const largeur = 620;
   const hauteur = 170;
   const max = Math.max(...points);
@@ -596,7 +633,7 @@ function Courbe({ points }) {
       <path d={aire} fill="url(#loo-admin-degrade)" />
       <path d={ligne} fill="none" stroke="var(--loo-rouge)" strokeWidth="2.5" strokeLinecap="round" />
       {coords.map(([x, y], i) => (
-        <circle key={points[i]} cx={x} cy={y} r="3" fill="var(--loo-blanc)" stroke="var(--loo-rouge)" strokeWidth="2" />
+        <circle key={`point-${i}`} cx={x} cy={y} r="3" fill="var(--loo-blanc)" stroke="var(--loo-rouge)" strokeWidth="2" />
       ))}
     </svg>
   );

@@ -73,6 +73,10 @@ npm run build      # vérif avant commit (doit passer)
 5. **Brancher les blocs « fictifs »** au fur et à mesure que les tables existent
    (message, avis, favori, demande, litige, vue_profil, recherche_sans_resultat,
    session_connexion…). Tant qu'une table n'existe pas : le bloc reste marqué « fictif ».
+   → **fait le 12/10/2026 après l'accès au code source complet** : la matrice
+   « chaque interface → sa source » et l'état sont dans
+   [`PLAN-DE-BRANCHEMENT.md`](./PLAN-DE-BRANCHEMENT.md). Les blocs branchés lisent
+   `src/api/loohoo.js` ; ceux sans source portent la mention « pas connecté ».
 6. **Écran « Demandes non couvertes »** (recherches sans résultat) — priorité haute
    dans la spec.
 7. **Sécurité admin** : 2FA, déconnexion automatique, journal d'audit des actions.
