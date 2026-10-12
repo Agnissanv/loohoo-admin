@@ -188,15 +188,19 @@ le code les croit privés. Les numéros de téléphone, eux, sont bien protégé
       file d'attente, publiés + décision réelle.
 - [x] Écran **Service client** (n04) : litiges (affaires), avis 1-2★, alertes
       stock, arbitrage réel (`admin_trancher_affaire`).
-- [x] `donnees-fictives.js` / `donnees-espaces.js` vidés de tout chiffre inventé :
-      ils ne gardent que le contenu d'écran et les blocs « pas connecté ».
+- [x] Écran **Demandes non couvertes** : table `recherche_sans_resultat` via
+      `admin_recherches_vides(p_jours)`, périodes 7 / 30 / 90 jours, filtre
+      terme-catégorie-ville, et le regroupement des villes / catégories les plus
+      demandées — la liste des fournisseurs à recruter en priorité.
+- [x] `donnees-repli.js` (ex `donnees-fictives.js`) / `donnees-espaces.js` vidés de
+      tout chiffre inventé : ils ne gardent que le contenu d'écran et les blocs
+      « pas connecté ».
 - [x] Jeu de démonstration local `src/api/loohoo-demo.js` (remplacé à la volée par
       `vite.config.js` quand `VITE_DEMO_ADMIN=1`) pour voir les écrans sans compte admin.
-- [x] `npm run build` passe ; les 5 écrans s'affichent sans erreur JS.
+- [x] `npm run build` passe ; les 6 écrans s'affichent sans erreur JS.
 - [ ] **À faire par un humain** : se connecter avec un vrai compte admin et vérifier
       que chaque bloc remonte bien les données de la base (les tests ci-dessus
       n'ont pas pu utiliser de session administrateur).
-- [ ] Écran **Demandes non couvertes** (source prête : `recherche_sans_resultat`).
 - [ ] Écran **Produits**, **Conversations**, **Acheteurs**, **Catégories**,
       **Commercial terrain** (aucune table commerciale → à décider).
 - [ ] Décider du sort de `moderer_produit` (fonction absente des migrations).

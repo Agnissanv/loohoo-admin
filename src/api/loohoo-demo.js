@@ -23,6 +23,32 @@ function serie(base, pas) {
 
 export const SANS_SOURCE = 'pas connecté — aucune source dans le code';
 
+/*
+  Mêmes petites aides d'affichage que src/api/loohoo.js (durée écrite, mois courts,
+  montant en FCFA). Elles sont recopiées ici, et non réexportées depuis loohoo.js :
+  en démonstration, le greffon de vite.config.js redirige tout import de loohoo.js
+  vers ce fichier, un réexport serait donc un import de soi-même.
+*/
+const MOIS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+function ilYA(date) {
+  const diff = Date.now() - new Date(date).getTime();
+  if (Number.isNaN(diff)) return '—';
+  const min = Math.floor(diff / 60000);
+  if (min < 60) return `il y a ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const j = Math.floor(h / 24);
+  if (j === 1) return 'hier';
+  return `il y a ${j} j`;
+}
+
+function eurosFcfa(n) {
+  return `${Number(n || 0).toLocaleString('fr-FR')} FCFA`;
+}
+
+export { MOIS, ilYA, eurosFcfa };
+
 export function resumeSources() {
   return 'Démonstration locale (VITE_DEMO_ADMIN=1) : les blocs sont remplis avec les '
     + 'valeurs des maquettes. En ligne, les mêmes blocs lisent la base LOOHOO.';

@@ -7,6 +7,7 @@ import FileValidation from './pages/FileValidation.jsx';
 import EspaceModerateur from './pages/EspaceModerateur.jsx';
 import ServiceClientLitiges from './pages/ServiceClientLitiges.jsx';
 import Boutiques from './pages/Boutiques.jsx';
+import DemandesNonCouvertes from './pages/DemandesNonCouvertes.jsx';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Route path="/fournisseurs/en-attente" element={<FileValidation />} />
       <Route path="/moderateur" element={<EspaceModerateur />} />
       <Route path="/service-client" element={<ServiceClientLitiges />} />
+      <Route path="/demandes" element={<DemandesNonCouvertes />} />
       <Route path="/boutiques" element={<Boutiques />} />
     </Routes>
   );

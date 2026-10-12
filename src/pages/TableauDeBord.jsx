@@ -6,7 +6,7 @@ import {
 import {
   changerStatut, recupererFournisseurs, recupererStats, recupererStatsBoutiques,
 } from '../api/admin.js';
-import { DONNEES_FICTIVES, TEXTE_RAPPEL } from '../api/donnees-fictives.js';
+import { DONNEES_REPLI, TEXTE_RAPPEL } from '../api/donnees-repli.js';
 import { chargerGeneral, chargerRecherchesVides, resumeSources } from '../api/loohoo.js';
 import { useSessionAdmin } from '../hooks/useSessionAdmin.js';
 import CarteFournisseurAdmin from '../components/CarteFournisseurAdmin.jsx';
@@ -55,7 +55,7 @@ export default function TableauDeBord() {
 
   // Blocs branchés sur la base LOOHOO (voir src/api/loohoo.js) : ils écrasent
   // les valeurs de repli au fur et à mesure de la lecture.
-  const D = { ...DONNEES_FICTIVES, ...(reel || {}) };
+  const D = { ...DONNEES_REPLI, ...(reel || {}) };
 
   const recharger = useCallback(() => {
     recupererFournisseurs().then(setFournisseurs).catch((err) => setErreur(err.message));

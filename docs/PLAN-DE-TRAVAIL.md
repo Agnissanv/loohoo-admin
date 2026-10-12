@@ -43,10 +43,14 @@ npm run build      # vérif avant commit (doit passer)
     fournisseurs publiés, commerciaux).
   - `src/pages/ServiceClientLitiges.jsx` → route `/service-client` (bascule
     ⚖️ Litiges / 📞 Call center, dossier de litige, file des litiges, alertes stock).
+  - `src/pages/DemandesNonCouvertes.jsx` → route `/demandes` (recherches sans
+    résultat : périodes 7 / 30 / 90 jours, filtre, villes et catégories les plus
+    demandées — les fournisseurs à recruter en priorité).
   - Navigation : `src/components/NavAdmin.jsx` (Général / Fournisseurs / Modérateur /
-    Service client / Boutiques 🔒 — verrou visuel seulement pour l'instant).
+    Service client / Demandes non couvertes / Boutiques 🔒 — verrou visuel seulement
+    pour l'instant).
   - Valeurs des écrans isolées dans `src/api/donnees-espaces.js` (mêmes règles que
-    `donnees-fictives.js`) ; styles dans `src/admin-espaces.css`.
+    `donnees-repli.js`) ; styles dans `src/admin-espaces.css`.
 - **Liaisons entre écrans — câblées le 09/10/2026** (inventaire complet :
   [`PLAN-DE-LIAISONS.md`](./PLAN-DE-LIAISONS.md)) : les sections/lignes qui mènent à un
   écran existant sont de vrais liens (`<Link>`), plus des blocs inertes. Nouvelle page
@@ -54,7 +58,7 @@ npm run build      # vérif avant commit (doit passer)
   à valider » des maquettes n02/n03). Composant `src/components/ItemEspace.jsx` = ligne
   « bouton si aucune cible, lien sinon » ; styles dans `src/admin-liaisons.css`.
 - Blocs **sans source de données** clairement marqués « fictif » à l'écran, valeurs
-  isolées dans un seul fichier : `src/api/donnees-fictives.js` (aucune lecture en base).
+  isolées dans un seul fichier : `src/api/donnees-repli.js` (aucune lecture en base).
 - Le bandeau en haut de page rappelle que ces blocs ne sont branchés sur rien.
 
 ## Prochaines étapes, dans l'ordre

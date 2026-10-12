@@ -23,6 +23,7 @@ const ENTREES = [
   { chemin: '/fournisseurs', libelle: 'Fournisseurs' },
   { chemin: '/moderateur', libelle: 'Modérateur' },
   { chemin: '/service-client', libelle: 'Service client' },
+  { chemin: '/demandes', libelle: 'Demandes non couvertes' },
   { chemin: '/boutiques', libelle: 'Boutiques 🔒' },
 ];
 

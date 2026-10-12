@@ -17,7 +17,13 @@
 
 export const TEXTE_RAPPEL = 'pas connecté';
 
-export const DONNEES_FICTIVES = {
+/*
+  Le fichier s'appelait donnees-fictives.js tant qu'il portait des chiffres de
+  maquette. Renommé donnees-repli.js : il ne contient plus que du repli vide et
+  les blocs sans source, pour que le nom ne laisse plus croire le contraire.
+*/
+
+export const DONNEES_REPLI = {
   /* ---- Chiffre d'affaires : repli vide (lecture réelle via loohoo.js) ---- */
   ca: null,
 
