@@ -138,6 +138,38 @@ commission). Il se calcule avec `grossiste.abonnement_actif` +
 |---|---|---|
 | Recherches sans résultat | `recherche_sans_resultat` + `admin_recherches_vides(p_jours)` | 🆕 écran à créer, source prête |
 
+### 3.8 Écrans ajoutés au module Fournisseurs (maquette n02, 13/10/2026)
+
+| Écran | Source réelle | État |
+|---|---|---|
+| **/produits** | table `produit` (lecture publique) : nom, categorie, sous_categorie, statut, actif, prix_gros_fcfa, prix_unitaire_fcfa, moq, unite, stock_disponible, stock_verifie_le, stock_maj_le, date_ajout, motif_rejet + `grossiste` pour le nom du fournisseur | ✅ branché |
+| idem — décision « vérifier le stock » | `verifier_stock_produit(p_id, p_verifie)` (migration 0009) | ✅ branché |
+| **/categories** | tables `categorie`, `sous_categorie`, `pays_loohoo` (lecture publique) + comptage des produits publiés par catégorie | ✅ branché |
+| idem — renommage | `admin_renommer_categorie(p_ancien, p_nouveau)`, `admin_renommer_sous_categorie(p_categorie, p_ancien, p_nouveau)` (0013) | ✅ branché |
+| idem — ouverture d'un pays | `admin_ouvrir_pays(code, ouvert)` (0024) — super-admin ; l'écran n'affiche que l'état lu | ⛔ action volontairement absente de l'écran |
+| **/acheteurs** | `admin_vendeurs()` (0010) : la table `vendeur` en entier (nom, activité, téléphone, e-mail, pays, date d'inscription) ; coordonnées masquées à l'écran, affichées sur clic | ✅ branché |
+| idem — « demandes envoyées par acheteur » | — le compte de demandes vit dans `conversation`, pas sur la fiche acheteur | ⛔ « pas connecté » sur cet écran, réel sur /conversations |
+| **/conversations** | tables `conversation` (derniere_activite, grossiste_id, vendeur_id, produit_id) + `message` (expediteur, contenu, date_envoi, lu, signale, signale_traite) | ✅ branché |
+| idem — statut de conversation (nouveau / répondu / conclu) | — **aucune colonne de statut** dans `conversation` ; seul « le fournisseur a répondu » est réel (déduit de `message.expediteur`) | ⛔ « pas connecté » |
+| idem — messages signalés | `admin_marquer_message_traite(p_id, p_traite)` (0011) | ✅ branché |
+| **/avis** | `admin_liste_avis(p_statut)` + `admin_moderer_avis(p_id, p_publier, p_motif)` (0016) | ✅ branché |
+| idem — moyenne publique d'un fournisseur | `resume_avis(fournisseur)` côté site (l'écran n'affiche que la moyenne des avis listés) | ✔️ sans objet côté admin |
+
+Blocs « pas connecté » **de nouveau vérifiés dans le code** le 13/10/2026 (et non
+supposés) :
+
+- **Commerciaux terrain** : les 24 migrations du dépôt fournisseurs ne contiennent
+  **aucune** occurrence du mot `commercial` — ni table, ni fonction, ni colonne.
+- **Type de litige** (Paiement / Délai / Autre) : `affaire` a 14 colonnes
+  (`id, conversation_id, grossiste_id, vendeur_id, produit_id, grossiste_nom,
+  vendeur_nom, produit_nom, montant_fcfa, description, declaree_par, statut,
+  date_declaration, date_reponse`) — **pas de colonne `type`**.
+- **Recruté par** : ni `grossiste` ni `vendeur` ne portent de colonne de parrainage
+  ou de recruteur.
+- **Parrainage / filleuls** : toujours aucune table dans la base de l'annuaire
+  (les tables `referrals` / `commercial_referrals` trouvées ailleurs appartiennent
+  à l'application Boutique, une autre base).
+
 ## 4. Légende des états
 
 - ✅ **déjà branché** : lit la base ou une fonction serveur aujourd'hui.
@@ -197,11 +229,19 @@ le code les croit privés. Les numéros de téléphone, eux, sont bien protégé
       « pas connecté ».
 - [x] Jeu de démonstration local `src/api/loohoo-demo.js` (remplacé à la volée par
       `vite.config.js` quand `VITE_DEMO_ADMIN=1`) pour voir les écrans sans compte admin.
-- [x] `npm run build` passe ; les 6 écrans s'affichent sans erreur JS.
+- [x] `npm run build` passe ; les écrans s'affichent sans erreur JS.
+- [x] **13/10/2026 — cinq écrans ajoutés et branchés** sur la vraie base :
+      **Produits**, **Catégories**, **Acheteurs**, **Conversations**, **Avis des
+      acheteurs** (détail des sources en 3.8), + les liens dans la barre de
+      navigation. Vérifié par appels réels sur la base : `produit` (17 colonnes
+      demandées, toutes valides), `categorie` (16), `sous_categorie` (69),
+      `pays_loohoo` (7) répondent en lecture publique ; `admin_vendeurs`,
+      `admin_liste_avis` et `admin_tableau_de_bord` répondent bien
+      « permission denied » sans session admin — c'est la preuve qu'elles sont
+      réservées et qu'elles se rempliront une fois connecté.
 - [ ] **À faire par un humain** : se connecter avec un vrai compte admin et vérifier
       que chaque bloc remonte bien les données de la base (les tests ci-dessus
       n'ont pas pu utiliser de session administrateur).
-- [ ] Écran **Produits**, **Conversations**, **Acheteurs**, **Catégories**,
-      **Commercial terrain** (aucune table commerciale → à décider).
-- [ ] Décider du sort de `moderer_produit` (fonction absente des migrations).
+- [ ] Décider du sort de `moderer_produit` (fonction absente des migrations) et de
+      `admin_ouvrir_pays` (présent, mais volontairement pas exposé dans l'interface).
 
