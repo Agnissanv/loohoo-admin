@@ -887,6 +887,10 @@ export async function marquerMessageTraite(id, traite = true) {
   return rpc('admin_marquer_message_traite', { p_id: id, p_traite: traite });
 }
 
+/* Vrai uniquement en démonstration locale : loohoo-demo.js exporte true.
+   Sert au bandeau en haut d'écran pour annoncer la bonne origine des chiffres. */
+export const DEMONSTRATION = false;
+
 /* Résumé lisible de l'origine des blocs, pour le bandeau en haut d'écran. */
 export function resumeSources(sources = {}) {
   const reels = [];

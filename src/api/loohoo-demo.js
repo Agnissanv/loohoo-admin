@@ -49,6 +49,9 @@ function eurosFcfa(n) {
 
 export { MOIS, ilYA, eurosFcfa };
 
+/* Vrai ici seulement : ce module n'est utilisé que par la démonstration locale. */
+export const DEMONSTRATION = true;
+
 export function resumeSources() {
   return 'Démonstration locale (VITE_DEMO_ADMIN=1) : les blocs sont remplis avec les '
     + 'valeurs des maquettes. En ligne, les mêmes blocs lisent la base LOOHOO.';
