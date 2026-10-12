@@ -228,3 +228,136 @@ export async function chargerRecherchesVides() {
     ],
   };
 }
+
+/* ---------------------------------------------------------------------------
+   ÉCRANS AJOUTÉS AU MODULE FOURNISSEURS (maquette n02) : Produits, Acheteurs,
+   Catégories, Conversations, Avis. Les mêmes fonctions existent dans
+   src/api/loohoo.js, qui lit la vraie base. En démonstration on rend les valeurs
+   des maquettes ; les blocs sans source restent marqués « pas connecté ».
+--------------------------------------------------------------------------- */
+
+const RETARD = (h) => new Date(Date.now() - h * 3600 * 1000).toISOString();
+
+export async function chargerProduits({ statut = '' } = {}) {
+  const produit = (id, nom, categorie, sous, prix, moq, unite, stock, verif, age) => ({
+    id, nom, categorie, sous_categorie: sous, statut: 'publie', actif: true,
+    prix_gros_fcfa: prix, prix_unitaire_fcfa: Math.round(prix * 1.35), moq, unite,
+    stock_disponible: stock, stock_verifie_le: verif, stock_maj_le: RETARD(12),
+    date_ajout: RETARD(age), photo_url: null, motif_rejet: null,
+    fournisseur: { id: 'g1', nom: 'Bazin Mania', ville: 'Bamako', badge_verifie: true },
+  });
+  const tous = [
+    produit('p1', 'Bazin riche Getzner', 'Textile', 'Bazin', 4500, 10, 'mètre', 240, RETARD(30), 700),
+    produit('p2', 'Bazin riche Super', 'Textile', 'Bazin', 5200, 10, 'mètre', 120, null, 500),
+    produit('p3', 'Savon noir Karité 250 g', 'Cosmétiques', 'Savons', 750, 24, 'pièce', 800, RETARD(60), 300),
+    { ...produit('p4', 'Panneau solaire 100 W', 'Électronique', 'Solaire', 42000, 5, 'pièce', 18, null, 120),
+      statut: 'en_attente', motif_rejet: null },
+    { ...produit('p5', 'Casque Bluetooth', 'Électronique', 'Audio', 9500, 12, 'pièce', 60, null, 90),
+      statut: 'rejete', motif_rejet: 'photo manquante' },
+  ];
+  const liste = statut ? tous.filter((p) => p.statut === statut) : tous;
+  return {
+    produits: liste,
+    compte: { total: 1180, publies: 1180, en_attente: 24, rejetes: 11, stock_non_verifie: 37 },
+    categories: ['Cosmétiques', 'Électronique', 'Textile'],
+  };
+}
+
+export async function verifierStockProduit() {
+  return null; // en démonstration, rien n'est écrit
+}
+
+export async function chargerAcheteurs() {
+  return {
+    acheteurs: [
+      { id: 'v1', nom: 'Aya Boutique', activite: 'Boutique de tissus', pays: 'CI', telephone: '2250700000001', email: 'aya@exemple.ci', inscription: RETARD(50) },
+      { id: 'v2', nom: 'Sika Cosmetics Shop', activite: 'Cosmétiques', pays: 'SN', telephone: '221770000002', email: 'sika@exemple.sn', inscription: RETARD(200) },
+      { id: 'v3', nom: 'Koné Électro', activite: 'Électronique', pays: 'ML', telephone: '22366000003', email: null, inscription: RETARD(30) },
+      { id: 'v4', nom: 'Faso Market', activite: 'Alimentation', pays: 'BF', telephone: '22670000004', email: 'faso@exemple.bf', inscription: RETARD(9) },
+    ],
+    compte: { total: 1280, nouveaux_7j: 96, parPays: { CI: 620, SN: 240, ML: 180, BF: 140, TG: 100 } },
+  };
+}
+
+export async function chargerCategories() {
+  const cat = (id, nom, ordre, produits, sous) => ({ id, nom, ordre, active: true, produits, sous });
+  return {
+    categories: [
+      cat('c1', 'Textile', 1, 420, [
+        { id: 's1', categorie_id: 'c1', nom: 'Bazin', ordre: 1, active: true },
+        { id: 's2', categorie_id: 'c1', nom: 'Pagne', ordre: 2, active: true },
+        { id: 's3', categorie_id: 'c1', nom: 'Wax', ordre: 3, active: true },
+      ]),
+      cat('c2', 'Cosmétiques', 2, 310, [
+        { id: 's4', categorie_id: 'c2', nom: 'Savons', ordre: 1, active: true },
+        { id: 's5', categorie_id: 'c2', nom: 'Huiles', ordre: 2, active: true },
+      ]),
+      cat('c3', 'Électronique', 3, 280, [
+        { id: 's6', categorie_id: 'c3', nom: 'Solaire', ordre: 1, active: true },
+        { id: 's7', categorie_id: 'c3', nom: 'Audio', ordre: 2, active: true },
+      ]),
+    ],
+    orphelines: ['Alimentation'],
+    sansCategorie: 6,
+    pays: [
+      { code: 'CI', nom: 'Côte d’Ivoire', dans: true, devise: 'FCFA', indicatif: '+225', ordre: 1, actif: true },
+      { code: 'SN', nom: 'Sénégal', dans: true, devise: 'FCFA', indicatif: '+221', ordre: 2, actif: true },
+      { code: 'ML', nom: 'Mali', dans: true, devise: 'FCFA', indicatif: '+223', ordre: 3, actif: true },
+      { code: 'BF', nom: 'Burkina Faso', dans: true, devise: 'FCFA', indicatif: '+226', ordre: 4, actif: false },
+    ],
+    compteProduits: 1180,
+  };
+}
+
+export async function renommerCategorie() { return null; }
+export async function renommerSousCategorie() { return null; }
+
+export async function chargerAvis(statut = 'en_attente') {
+  const avis = (id, note, commentaire, qui, age) => ({
+    id, note, commentaire, statut, motif_rejet: statut === 'rejete' ? 'propos injurieux' : null,
+    quand: RETARD(age), modere: statut === 'en_attente' ? null : RETARD(age - 2),
+    fournisseur: qui.f, acheteur: qui.a,
+  });
+  const tous = [
+    avis('a1', 5, 'Livraison rapide, tissus conformes.', { f: 'Bazin Mania', a: 'Aya Boutique' }, 20),
+    avis('a2', 4, 'Bon rapport qualité-prix, un peu de retard.', { f: 'Sika Beauty', a: 'Koné Électro' }, 44),
+    avis('a3', 5, 'Très bon contact.', { f: 'Électro Plus CI', a: 'Faso Market' }, 200),
+    avis('a4', 1, 'Jamais reçu ma commande.', { f: 'Koné Textiles', a: 'Aya Boutique' }, 300),
+  ];
+  const liste = tous.filter((a) => a.statut === statut || a.statut === 'en_attente');
+  return {
+    avis: liste,
+    statut,
+    compte: { total: liste.length, parNote: { 1: 1, 2: 0, 3: 0, 4: 1, 5: 2 }, moyenne: '3,8' },
+  };
+}
+
+export async function modererAvis() { return null; }
+
+export async function chargerConversations() {
+  const conv = (id, acheteur, fournisseur, msgs, quand) => ({
+    id,
+    quand,
+    fournisseur: { id: 'g1', nom: fournisseur, ville: 'Bamako' },
+    acheteur: { id: 'v1', nom: acheteur, activite: 'Boutique de tissus' },
+    messages: msgs,
+    nbMessages: msgs.length,
+    repondu: msgs.some((m) => m.expediteur === 'fournisseur'),
+    signales: msgs.filter((m) => m.signale && !m.signale_traite).length,
+    statut: null,
+  });
+  return {
+    conversations: [
+      conv('k1', 'Aya Boutique', 'Bazin Mania', [
+        { id: 'm1', conversation_id: 'k1', expediteur: 'vendeur', contenu: 'Bonjour, quel est le prix du bazin au mètre ?', date_envoi: RETARD(30), lu: true, signale: false, signale_traite: false },
+        { id: 'm2', conversation_id: 'k1', expediteur: 'fournisseur', contenu: 'Bonjour, 4 500 FCFA le mètre, minimum 10 mètres.', date_envoi: RETARD(28), lu: true, signale: false, signale_traite: false },
+      ], RETARD(28)),
+      conv('k2', 'Koné Électro', 'Électro Plus CI', [
+        { id: 'm3', conversation_id: 'k2', expediteur: 'vendeur', contenu: 'Appelez-moi au 07 00 00 00 01 pour le panneau solaire.', date_envoi: RETARD(70), lu: true, signale: true, signale_traite: false },
+      ], RETARD(70)),
+    ],
+    compte: { total: 412, sansReponse: 37, signales: 2 },
+  };
+}
+
+export async function marquerMessageTraite() { return null; }

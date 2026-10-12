@@ -642,6 +642,218 @@ export async function chargerRecherchesVides(jours = 30) {
   }
 }
 
+/* ------------------------------------------- 7. écran « Produits » */
+
+/*
+  Source : table `produit` (+ `produit_photo`), lisible publiquement
+  (migrations 0005 pour les photos, 0007 pour le retrait des données privées).
+  On lit donc de vrais produits sans compte admin.
+
+  Colonnes réelles : nom, categorie, sous_categorie, statut, actif, prix_gros_fcfa,
+  prix_unitaire_fcfa, moq, unite, stock_disponible, stock_verifie_le, stock_maj_le,
+  grossiste_id, date_ajout, photo_url, motif_rejet.
+
+  Décision de l'équipe sur le stock : verifier_stock_produit(id, vrai/faux) — migration 0009.
+*/
+const COLONNES_PRODUIT =
+  'id, nom, categorie, sous_categorie, statut, actif, prix_gros_fcfa, prix_unitaire_fcfa, moq, unite, ' +
+  'stock_disponible, stock_verifie_le, stock_maj_le, grossiste_id, date_ajout, photo_url, motif_rejet';
+
+export async function chargerProduits({ statut = '', categorie = '', limite = 200 } = {}) {
+  const produits = await lignes('produit', COLONNES_PRODUIT, (q) => {
+    let r = q.order('date_ajout', { ascending: false }).limit(limite);
+    if (statut) r = r.eq('statut', statut);
+    if (categorie) r = r.eq('categorie', categorie);
+    return r;
+  });
+  const grossistes = await lignes('grossiste', 'id, nom, ville, badge_verifie').catch(() => []);
+  const parId = new Map(grossistes.map((g) => [g.id, g]));
+
+  // Compteurs réels, statut par statut : rien n'est estimé.
+  const publiesActifs = await compter('produit', (q) => q.eq('statut', 'publie').eq('actif', true)).catch(() => null);
+  const enAttente = await compter('produit', (q) => q.eq('statut', 'en_attente')).catch(() => null);
+  const rejetes = await compter('produit', (q) => q.eq('statut', 'rejete')).catch(() => null);
+  const nonVerifies = await compter('produit', (q) =>
+    q.eq('statut', 'publie').eq('actif', true).is('stock_verifie_le', null)
+  ).catch(() => null);
+  const total = await compter('produit', (q) => q).catch(() => null);
+
+  return {
+    produits: produits.map((p) => ({ ...p, fournisseur: parId.get(p.grossiste_id) || null })),
+    compte: { total, publies: publiesActifs, en_attente: enAttente, rejetes, stock_non_verifie: nonVerifies },
+    categories: [...new Set(produits.map((p) => p.categorie).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr')),
+  };
+}
+
+/* Vérifie (ou retire la vérification du) stock d'un produit — réservé à l'admin. */
+export async function verifierStockProduit(id, verifie = true) {
+  return rpc('verifier_stock_produit', { p_id: id, p_verifie: verifie });
+}
+
+/* ------------------------------------------ 8. écran « Acheteurs » */
+
+/*
+  Source : admin_vendeurs() — migration 0010. La fonction rend la table `vendeur`
+  en entier (nom, activité, téléphone, e-mail, pays, date d'inscription) ; la lecture
+  directe de `vendeur` est refusée, seul l'administrateur passe par cette fonction.
+  Un compte sans droit admin reçoit « permission denied » : l'écran le dit au lieu
+  d'afficher des lignes inventées.
+*/
+export async function chargerAcheteurs() {
+  const brut = await rpc('admin_vendeurs');
+  const acheteurs = (brut || []).map((v) => ({
+    id: v.id, nom: v.nom, activite: v.activite || null, pays: v.pays_code || null,
+    telephone: v.telephone || null, email: v.email || null,
+    inscription: v.date_inscription || null,
+  }));
+  const parPays = {};
+  acheteurs.forEach((a) => { const p = a.pays || 'non précisé'; parPays[p] = (parPays[p] || 0) + 1; });
+  const ilYA7j = new Date(Date.now() - 7 * JOUR).toISOString();
+  return {
+    acheteurs,
+    compte: {
+      total: acheteurs.length,
+      nouveaux_7j: acheteurs.filter((a) => a.inscription && a.inscription >= ilYA7j).length,
+      parPays,
+    },
+  };
+}
+
+/* ----------------------------------------- 9. écran « Catégories » */
+
+/*
+  Source : tables `categorie` (nom, ordre, active), `sous_categorie`
+  (categorie_id, nom, ordre, active) et `pays_loohoo` (code, nom, dans, actif) —
+  migrations 0013 et 0024, toutes lisibles sans compte admin.
+  Renommage réservé à l'admin : admin_renommer_categorie / admin_renommer_sous_categorie.
+*/
+export async function chargerCategories() {
+  const [cats, sous, pays, produits] = await Promise.all([
+    lignes('categorie', 'id, nom, ordre, active', (q) => q.order('ordre')),
+    lignes('sous_categorie', 'id, categorie_id, nom, ordre, active', (q) => q.order('ordre')),
+    lignes('pays_loohoo', 'code, nom, dans, devise, indicatif, ordre, actif', (q) => q.order('ordre')).catch(() => []),
+    lignes('produit', 'categorie, sous_categorie, statut, actif').catch(() => []),
+  ]);
+
+  // Comptage réel des produits par catégorie : on compte ce qu'on a lu, rien de plus.
+  const publies = produits.filter((p) => p.statut === 'publie' && p.actif);
+  const parCategorie = {};
+  publies.forEach((p) => {
+    const c = (p.categorie || 'sans catégorie').trim();
+    parCategorie[c] = (parCategorie[c] || 0) + 1;
+  });
+
+  return {
+    categories: cats.map((c) => ({
+      ...c,
+      produits: parCategorie[c.nom] || 0,
+      sous: sous.filter((s) => s.categorie_id === c.id),
+    })),
+    orphelines: Object.keys(parCategorie).filter((n) => n !== 'sans catégorie' && !cats.some((c) => c.nom === n)),
+    sansCategorie: parCategorie['sans catégorie'] || 0,
+    pays: pays.map((p) => ({ ...p, produits: null })),
+    compteProduits: publies.length,
+  };
+}
+
+/* Renommage (propagation sur les produits et fournisseurs) — réservé à l'admin. */
+export async function renommerCategorie(ancien, nouveau) {
+  return rpc('admin_renommer_categorie', { p_ancien: ancien, p_nouveau: nouveau });
+}
+
+export async function renommerSousCategorie(categorie, ancien, nouveau) {
+  return rpc('admin_renommer_sous_categorie', { p_categorie: categorie, p_ancien: ancien, p_nouveau: nouveau });
+}
+
+/* ------------------------------ 10. écran « Avis des acheteurs » */
+
+/*
+  Source : admin_liste_avis(p_statut) — migration 0016, fonction d'administration.
+  Un avis n'est visible publiquement qu'après validation par l'équipe : l'écran sert
+  exactement à cette décision (admin_moderer_avis : publier ou refuser, motif si refus).
+*/
+export async function chargerAvis(statut = 'en_attente') {
+  const brut = await rpc('admin_liste_avis', { p_statut: statut });
+  const liste = (brut || []).map((a) => ({
+    id: a.id,
+    note: a.note,
+    commentaire: a.commentaire || '',
+    statut: a.statut,
+    motif_rejet: a.motif_rejet || null,
+    quand: a.date_creation || null,
+    modere: a.date_moderation || null,
+    fournisseur: a.grossiste_nom || a.grossiste?.nom || null,
+    acheteur: a.vendeur_nom || a.vendeur?.nom || null,
+  }));
+  const parNote = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  liste.forEach((a) => { if (a.note >= 1 && a.note <= 5) parNote[a.note] += 1; });
+  const moyenne = liste.length
+    ? (liste.reduce((n, a) => n + (Number(a.note) || 0), 0) / liste.length).toFixed(1).replace('.', ',')
+    : '—';
+  return { avis: liste, statut, compte: { total: liste.length, parNote, moyenne } };
+}
+
+export async function modererAvis(id, publier, motif = null) {
+  return rpc('admin_moderer_avis', { p_id: id, p_publier: publier, p_motif: motif });
+}
+
+/* --------------------------------------- 11. écran « Conversations » */
+
+/*
+  Source : tables `conversation` et `message` (réservées à l'admin).
+  Colonnes réelles : conversation — id, derniere_activite, grossiste_id, vendeur_id,
+  produit_id ; message — id, conversation_id, expediteur ('vendeur' | 'fournisseur'),
+  contenu, date_envoi, lu.
+  Il n'existe AUCUNE colonne de statut de conversation ni de « conclue » dans le
+  schéma : l'écran ne l'invente pas, il marque ces cases « pas connecté ».
+  État « traité » d'un message signalé : admin_marquer_message_traite — migration 0011.
+*/
+export async function chargerConversations(limite = 60) {
+  const conversations = await lignes(
+    'conversation',
+    'id, derniere_activite, produit_id, grossiste(id, nom, ville), vendeur(id, nom, activite)',
+    (q) => q.order('derniere_activite', { ascending: false }).limit(limite)
+  );
+  const ids = conversations.map((c) => c.id);
+  const messages = ids.length
+    ? await lignes('message', 'id, conversation_id, expediteur, contenu, date_envoi, lu, signale, signale_traite',
+      (q) => q.in('conversation_id', ids).order('date_envoi', { ascending: true })).catch(() => [])
+    : [];
+  const parConversation = new Map();
+  messages.forEach((m) => {
+    if (!parConversation.has(m.conversation_id)) parConversation.set(m.conversation_id, []);
+    parConversation.get(m.conversation_id).push(m);
+  });
+  const liste = conversations.map((c) => {
+    const msgs = parConversation.get(c.id) || [];
+    const repondu = msgs.some((m) => m.expediteur === 'fournisseur');
+    const signales = msgs.filter((m) => m.signale && !m.signale_traite).length;
+    return {
+      id: c.id,
+      quand: c.derniere_activite,
+      fournisseur: c.grossiste || null,
+      acheteur: c.vendeur || null,
+      messages: msgs,
+      nbMessages: msgs.length,
+      repondu,            // lu dans message.expediteur : vrai renseignement
+      signales,
+      statut: null,       // aucune colonne de statut en base : « pas connecté »
+    };
+  });
+  return {
+    conversations: liste,
+    compte: {
+      total: liste.length,
+      sansReponse: liste.filter((c) => !c.repondu).length,
+      signales: liste.reduce((n, c) => n + c.signales, 0),
+    },
+  };
+}
+
+export async function marquerMessageTraite(id, traite = true) {
+  return rpc('admin_marquer_message_traite', { p_id: id, p_traite: traite });
+}
+
 /* Résumé lisible de l'origine des blocs, pour le bandeau en haut d'écran. */
 export function resumeSources(sources = {}) {
   const reels = [];

@@ -21,6 +21,11 @@ import { deconnecterAdmin } from '../api/admin.js';
 const ENTREES = [
   { chemin: '/', libelle: 'Général' },
   { chemin: '/fournisseurs', libelle: 'Fournisseurs' },
+  { chemin: '/produits', libelle: 'Produits' },
+  { chemin: '/acheteurs', libelle: 'Acheteurs' },
+  { chemin: '/categories', libelle: 'Catégories' },
+  { chemin: '/conversations', libelle: 'Conversations' },
+  { chemin: '/avis', libelle: 'Avis' },
   { chemin: '/moderateur', libelle: 'Modérateur' },
   { chemin: '/service-client', libelle: 'Service client' },
   { chemin: '/demandes', libelle: 'Demandes non couvertes' },
