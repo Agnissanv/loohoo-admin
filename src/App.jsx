@@ -11,6 +11,7 @@ import Produits from './pages/Produits.jsx';
 import Acheteurs from './pages/Acheteurs.jsx';
 import Conversations from './pages/Conversations.jsx';
 import Affaires from './pages/Affaires.jsx';
+import Avis from './pages/Avis.jsx';
 import Leads from './pages/Leads.jsx';
 import Categories from './pages/Categories.jsx';
 import TableauBoutiques from './pages/TableauBoutiques.jsx';
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/f/conversations" element={<Conversations />} />
         <Route path="/f/conversations/:id" element={<Conversations />} />
         <Route path="/f/affaires" element={<Affaires />} />
+        <Route path="/f/avis" element={<Avis />} />
         <Route path="/f/leads" element={<Leads />} />
         <Route path="/f/categories" element={<Categories />} />
 

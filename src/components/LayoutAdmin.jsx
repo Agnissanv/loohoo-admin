@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ClipboardCheck, Factory, Handshake, Home, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Package, ScrollText, Settings, Store, Tags, Users, X,
+  ClipboardCheck, Factory, Handshake, Home, LayoutDashboard, LogOut, Mail, Menu, MessageSquare, Package, ScrollText, Settings, Star, Store, Tags, Users, X,
 } from 'lucide-react';
-import { deconnecterAdmin, suivreSession, estAdmin, estSuperAdmin, tableauDeBord } from '../api/admin.js';
+import { deconnecterAdmin, suivreSession, estAdmin, estSuperAdmin, tableauDeBord, recupererAvis } from '../api/admin.js';
 import { initiales } from '../utils/format.js';
 
 // Deux espaces distincts, pour que l'administrateur sache toujours où il est :
@@ -17,6 +17,7 @@ const LIENS_FOURNISSEURS = [
   { vers: '/f/acheteurs', texte: 'Acheteurs', icone: Users },
   { vers: '/f/conversations', texte: 'Conversations', icone: MessageSquare },
   { vers: '/f/affaires', texte: 'Affaires et commissions', icone: Handshake },
+  { vers: '/f/avis', texte: 'Avis des acheteurs', icone: Star, pastilleAvis: true },
   { vers: '/f/leads', texte: 'Leads des acheteurs', icone: Mail },
   { vers: '/f/categories', texte: 'Catégories', icone: Tags, superSeulement: true },
 ];
@@ -41,6 +42,7 @@ export default function LayoutAdmin() {
   const [autorise, setAutorise] = useState(undefined);
   const [superAdmin, setSuperAdmin] = useState(false);
   const [compteurs, setCompteurs] = useState(null);
+  const [avisAttente, setAvisAttente] = useState(0);
   const [menuOuvert, setMenuOuvert] = useState(false);
 
   useEffect(() => suivreSession(setSession), []);
@@ -52,7 +54,11 @@ export default function LayoutAdmin() {
     estSuperAdmin().then(setSuperAdmin);
   }, [session, navigate]);
 
-  const rafraichir = useCallback(() => tableauDeBord().then(setCompteurs).catch(() => {}), []);
+  const rafraichir = useCallback(() => {
+    // Les avis en attente : sans effet tant que la migration 0016 n'est pas exécutée
+    recupererAvis().then((l) => setAvisAttente(l.filter((a) => a.statut === 'en_attente').length)).catch(() => setAvisAttente(0));
+    return tableauDeBord().then(setCompteurs).catch(() => {});
+  }, []);
 
   useEffect(() => { if (autorise) rafraichir(); }, [autorise, rafraichir, pathname]);
   useEffect(() => setMenuOuvert(false), [pathname]);
@@ -80,9 +86,10 @@ export default function LayoutAdmin() {
   const liensEspace = espace === 'fournisseurs' ? LIENS_FOURNISSEURS : espace === 'boutiques' ? LIENS_BOUTIQUES : [];
   const visible = (lien) => !lien.superSeulement || superAdmin;
 
-  const lienMenu = ({ vers, texte, icone: Icone, pastille, fin }) => (
+  const lienMenu = ({ vers, texte, icone: Icone, pastille, pastilleAvis, fin }) => (
     <NavLink key={vers} to={vers} end={fin} className={({ isActive }) => `esp-lien${isActive ? ' esp-lien-actif' : ''}`}>
       <Icone size={19} /> {texte}
+      {pastilleAvis && avisAttente > 0 && <span className="esp-pastille">{avisAttente > 99 ? '99+' : avisAttente}</span>}
       {pastille && aTraiter > 0 && <span className="esp-pastille">{aTraiter > 99 ? '99+' : aTraiter}</span>}
     </NavLink>
   );
